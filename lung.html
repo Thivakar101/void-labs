@@ -108,7 +108,7 @@
         scene.add(directionalLight);
 
         const loader = new THREE.GLTFLoader();
-        loader.load('lunggss.glb', function(gltf) {
+        loader.load('models/lunggss.glb', function(gltf) {
             const model = gltf.scene;
             scene.add(model);
         }, undefined, function(error) {

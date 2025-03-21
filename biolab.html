@@ -252,11 +252,11 @@
             
             // GLTF model paths 
             const modelPaths = [
-                'human_skull.glb',
-                'heart.glb',
-                'brains.glb',
-                'lunggss.glb',
-                'hb.glb'
+                'models/human_skull.glb',
+                'models/heart.glb',
+                'models/brains.glb',
+                'models/lunggss.glb',
+                'models/hb.glb'
             ];
             
             const loader = new THREE.GLTFLoader();
@@ -373,7 +373,7 @@
 
             // Load model inside center glass box
             const loader = new THREE.GLTFLoader();
-            loader.load('sk.glb', function(gltf) {
+            loader.load('models/sk.glb', function(gltf) {
                 const model = gltf.scene;
                 model.position.set(0, 0, 0); // Adjust position as needed
                 model.scale.set(0.2, 0.2, 0.2); // Adjust scale as needed

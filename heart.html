@@ -106,7 +106,7 @@
         scene.add(directionalLight);
 
         const loader = new THREE.GLTFLoader();
-        loader.load('heart.glb', function(gltf) {
+        loader.load('models/heart.glb', function(gltf) {
             const model = gltf.scene;
             scene.add(model);
         }, undefined, function(error) {
