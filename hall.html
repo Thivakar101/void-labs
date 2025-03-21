@@ -57,8 +57,7 @@
 
     // Load GLTF Model
     const loader = new THREE.GLTFLoader();
-    let gltfModel;
-    loader.load('hall.glb', function(gltf) {
+    loader.load('models/hall.glb', function(gltf) {
       gltf.scene.position.set(0, 0, 0);
       gltf.scene.scale.set(4, 4, 4);
 
@@ -78,14 +77,13 @@
       console.error('Error loading GLTF model:', error);
     });
 
-    // Load GLTF Model
-    const loader1 = new THREE.GLTFLoader();
-    let botModel;
-    loader1.load('bot.glb', function (gltf) {
-      gltf.scene.position.set(-1.2, 0.5, -3.2);
-      gltf.scene.scale.set(0.7, 0.7, 0.7);
-      gltf.scene.rotation.x = Math.PI;
-      gltf.scene.rotation.y = 2.7;
+// Load GLTF Model
+const loader1 = new THREE.GLTFLoader();
+loader1.load('bot.glb', function (gltf) {
+  gltf.scene.position.set(-1.2, 0.5, -3.2);
+  gltf.scene.scale.set(0.7, 0.7, 0.7);
+  gltf.scene.rotation.x = Math.PI;
+  gltf.scene.rotation.y = 2.7;
 
       gltf.scene.traverse((child) => {
         if (child.isMesh) {

@@ -105,7 +105,7 @@
         scene.add(directionalLight);
 
         const loader = new THREE.GLTFLoader();
-        loader.load('brains.glb', function(gltf) {
+        loader.load('models/brains.glb', function(gltf) {
             const model = gltf.scene;
             scene.add(model);
         }, undefined, function(error) {
