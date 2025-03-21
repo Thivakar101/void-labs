@@ -5,253 +5,252 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dijkstra Algorithm Visualization</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: bold;
+            margin: 0;
+            padding: 40px;
+            background-color: #121212;
+            color: #ffffff;
+            text-align: center;
+        }
 
-body {
-    font-family: 'Press Start 2P', cursive;
-    margin: 0;
-    padding: 40px;
-    background-color: #121212;
-    color: #ffffff;
-    text-align: center;
-}
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            border: 3px solid #6a0dad;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        }
 
-.container {
-    max-width: 1100px;
-    margin: 0 auto;
-    background-color: #1e1e1e;
-    padding: 30px;
-    border-radius: 12px;
-    border: 3px solid #6a0dad;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-}
+        h1 {
+            color: #c77dff;
+            font-size: 24px;
+            margin-bottom: 25px;
+        }
 
-h1 {
-    color: #c77dff;
-    font-size: 24px;
-    margin-bottom: 25px;
-}
+        .controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
 
-.controls {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin-bottom: 25px;
-}
+        .button-group {
+            display: flex;
+            gap: 15px;
+        }
 
-.button-group {
-    display: flex;
-    gap: 15px;
-}
+        button {
+            padding: 12px 20px;
+            background-color: #6a0dad;
+            color: #ffffff;
+            border: 2px solid #4a0072;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.3s ease-in-out;
+            font-size: 12px;
+        }
 
-button {
-    padding: 12px 20px;
-    background-color: #6a0dad;
-    color: #ffffff;
-    border: 2px solid #4a0072;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s ease-in-out;
-    font-size: 12px;
-}
+        button:hover {
+            background-color: #5a0092;
+            transform: scale(1.05);
+        }
 
-button:hover {
-    background-color: #5a0092;
-    transform: scale(1.05);
-}
+        button:disabled {
+            background-color: #444;
+            border-color: #333;
+            cursor: not-allowed;
+        }
 
-button:disabled {
-    background-color: #444;
-    border-color: #333;
-    cursor: not-allowed;
-}
+        select, input {
+            padding: 10px;
+            background-color: #333;
+            color: #ffffff;
+            border: 2px solid #6a0dad;
+            border-radius: 6px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-weight: bold;
+            font-size: 12px;
+        }
 
-select, input {
-    padding: 10px;
-    background-color: #333;
-    color: #ffffff;
-    border: 2px solid #6a0dad;
-    border-radius: 6px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 12px;
-}
+        .canvas-container {
+            position: relative;
+            margin: 0 auto;
+            border: 3px solid #6a0dad;
+            border-radius: 8px;
+            background-color: #181818;
+            width: 100%;
+            height: 450px;
+            overflow: hidden;
+        }
 
-.canvas-container {
-    position: relative;
-    margin: 0 auto;
-    border: 3px solid #6a0dad;
-    border-radius: 8px;
-    background-color: #181818;
-    width: 100%;
-    height: 450px;
-    overflow: hidden;
-}
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
 
-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
+        .info-panel {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #252525;
+            border-radius: 8px;
+            border-left: 5px solid #6a0dad;
+            font-size: 12px;
+        }
 
-.info-panel {
-    margin-top: 25px;
-    padding: 20px;
-    background-color: #252525;
-    border-radius: 8px;
-    border-left: 5px solid #6a0dad;
-    font-size: 12px;
-}
+        .node {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #3d3d3d;
+            border: 3px solid #6a0dad;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease-in-out;
+        }
 
-.node {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background-color: #3d3d3d;
-    border: 3px solid #6a0dad;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 14px;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.3s ease-in-out;
-}
+        .node:hover {
+            transform: scale(1.1);
+        }
 
-.node:hover {
-    transform: scale(1.1);
-}
+        .node.source {
+            background-color: #c105f5dc;
+            border-color:  #c105f5dc;
+        }
 
-.node.source {
-    background-color: #c105f5dc;
-    border-color:  #c105f5dc;
-}
+        .node.target {
+            background-color: #ff4f4f;
+            border-color: #b22222;
+        }
 
-.node.target {
-    background-color: #ff4f4f;
-    border-color: #b22222;
-}
+        .node.visited {
+            background-color: #ff79c6;
+            border-color: #ff44aa;
+        }
 
-.node.visited {
-    background-color: #ff79c6;
-    border-color: #ff44aa;
-}
+        .node.current {
+            background-color: #5a0092;
+            border-color: #4a0072;
+        }
 
-.node.current {
-    background-color: #5a0092;
-    border-color: #4a0072;
-}
+        .node.shortest-path {
+            background-color: #1abc9c;
+            border-color: #16a085;
+        }
 
-.node.shortest-path {
-    background-color: #1abc9c;
-    border-color: #16a085;
-}
+        .distance {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+        }
 
-.distance {
-    position: absolute;
-    background-color: rgba(0, 0, 0, 0.8);
-    padding: 4px 8px;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: bold;
-    color: #fff;
-}
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-.legend {
-    display: flex;
-    justify-content: center;
-    margin-top: 25px;
-    flex-wrap: wrap;
-    gap: 15px;
-}
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            gap: 10px;
+        }
 
-.legend-item {
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    gap: 10px;
-}
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
 
-.legend-color {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-}
+        .source-color {
+            background-color: #8b5cf6;
+            border: 3px solid #6a0dad;
+        }
 
-.source-color {
-    background-color: #8b5cf6;
-    border: 3px solid #6a0dad;
-}
+        .target-color {
+            background-color: #ff4f4f;
+            border: 3px solid #b22222;
+        }
 
-.target-color {
-    background-color: #ff4f4f;
-    border: 3px solid #b22222;
-}
+        .visited-color {
+            background-color: #ff79c6;
+            border: 3px solid #ff44aa;
+        }
 
-.visited-color {
-    background-color: #ff79c6;
-    border: 3px solid #ff44aa;
-}
+        .current-color {
+            background-color: #5a0092;
+            border: 3px solid #4a0072;
+        }
 
-.current-color {
-    background-color: #5a0092;
-    border: 3px solid #4a0072;
-}
+        .path-color {
+            background-color: #1abc9c;
+            border: 3px solid #16a085;
+        }
 
-.path-color {
-    background-color: #1abc9c;
-    border: 3px solid #16a085;
-}
+        .unvisited-color {
+            background-color: #3d3d3d;
+            border: 3px solid #6a0dad;
+        }
 
-.unvisited-color {
-    background-color: #3d3d3d;
-    border: 3px solid #6a0dad;
-}
+        .instructions {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: #252525;
+            border-radius: 8px;
+            color: white;
+            font-size: 19px;
+            text-align: left;
+        }
 
-.instructions {
-    margin-top: 25px;
-    padding: 20px;
-    background-color: #252525;
-    border-radius: 8px;
-    color: white;
-    font-size: 19px;
-    text-align: left;
-}
+        .step-display {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #333;
+            border-radius: 8px;
+            font-size: 12px;
+            color: white;
+            text-align: center;
+        }
 
-.step-display {
-    margin-top: 15px;
-    padding: 12px;
-    background-color: #333;
-    border-radius: 8px;
-    font-size: 12px;
-    color: white;
-    text-align: center;
-}
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
 
-@media (max-width: 768px) {
-    .controls {
-        flex-direction: column;
-        align-items: center;
-    }
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
 
-    .button-group {
-        flex-direction: column;
-        width: 100%;
-    }
+            button {
+                width: 100%;
+                font-size: 10px;
+            }
 
-    button {
-        width: 100%;
-        font-size: 10px;
-    }
-
-    select, input {
-        width: 100%;
-    }
-}
-
+            select, input {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -319,16 +318,11 @@ canvas {
         
         <div class="instructions">
             <h2>How to use:</h2>
-            ,br>
             <ol>
                 <li>Click "Random Graph" to generate a random graph, or create your own by dragging nodes.</li>
-                <br>
                 <li>Click on a node to set it as the start node (green).</li>
-                <br>
                 <li>Click on another node to set it as the target node (red).</li>
-                <br>
                 <li>Click "Start Algorithm" to initialize Dijkstra's algorithm.</li>
-                <br>
                 <li>Use "Next Step" to proceed through the algorithm step by step, or "Auto Run" to see the entire process.</li>
             </ol>
             <p><strong>Dijkstra's Algorithm</strong> finds the shortest path from a start node to all other nodes in a weighted graph. It works by repeatedly examining the unvisited node with the lowest distance, updating the distances to its neighbors, and marking it as visited.</p>
@@ -433,7 +427,6 @@ canvas {
                     visited: [],
                     currentNode: null,
                     path: [],
-
                     complete: false,
                     started: false
                 };
