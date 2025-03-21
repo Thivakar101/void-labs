@@ -71,74 +71,77 @@
         }
       });
 
-      scene.add(gltf.scene);
+      gltfModel = gltf.scene;
+      scene.add(gltfModel);
     }, undefined, function(error) {
       console.error('Error loading GLTF model:', error);
     });
 
 // Load GLTF Model
 const loader1 = new THREE.GLTFLoader();
-loader1.load('models/bot.glb', function (gltf) {
+loader1.load('bot.glb', function (gltf) {
   gltf.scene.position.set(-1.2, 0.5, -3.2);
   gltf.scene.scale.set(0.7, 0.7, 0.7);
   gltf.scene.rotation.x = Math.PI;
   gltf.scene.rotation.y = 2.7;
 
-  gltf.scene.traverse((child) => {
-    if (child.isMesh) {
-      child.material = new THREE.MeshStandardMaterial({
-        color: child.material.color,
+      gltf.scene.traverse((child) => {
+        if (child.isMesh) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: child.material.color,
+          });
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
       });
-      child.castShadow = true;
-      child.receiveShadow = true;
-    }
-  });
 
-  scene.add(gltf.scene);
-  
-  // Add event listener for hover detection
-  document.addEventListener("mousemove", onMouseMove);
+      botModel = gltf.scene;
+      scene.add(botModel);
+      
+      // Add event listener for hover detection
+      document.addEventListener("mousemove", onMouseMove);
 
-  // Raycaster for detecting mouse hover
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2();
-  const tooltip = document.createElement("div");
+      // Raycaster for detecting mouse hover
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      const tooltip = document.createElement("div");
 
-  // Style the tooltip
-  tooltip.style.position = "absolute";
-  tooltip.style.background = "rgba(0, 0, 0, 0.7)";
-  tooltip.style.color = "#fff";
-  tooltip.style.padding = "5px 10px";
-  tooltip.style.borderRadius = "5px";
-  tooltip.style.fontSize = "14px";
-  tooltip.style.display = "none";
-  tooltip.style.pointerEvents = "none";
-  tooltip.innerHTML = "Welcome to VOID LABS"; // Updated text
-  document.body.appendChild(tooltip);
-
-  function onMouseMove(event) {
-    // Convert mouse position to normalized device coordinates (-1 to +1)
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    // Update the raycaster
-    raycaster.setFromCamera(mouse, camera);
-
-    // Check for intersections
-    const intersects = raycaster.intersectObject(gltf.scene, true);
-
-    if (intersects.length > 0) {
-      tooltip.style.display = "block";
-      tooltip.style.left = event.clientX + 10 + "px";
-      tooltip.style.top = event.clientY + 10 + "px";
-    } else {
+      // Style the tooltip
+      tooltip.style.position = "absolute";
+      tooltip.style.background = "rgba(0, 0, 0, 0.7)";
+      tooltip.style.color = "#fff";
+      tooltip.style.padding = "5px 10px";
+      tooltip.style.borderRadius = "5px";
+      tooltip.style.fontSize = "14px";
       tooltip.style.display = "none";
-    }
-  }
-}, undefined, function (error) {
-  console.error("Error loading GLTF model:", error);
-});
-    //3D button
+      tooltip.style.pointerEvents = "none";
+      tooltip.innerHTML = "Welcome to VOID LABS"; // Updated text
+      document.body.appendChild(tooltip);
+
+      function onMouseMove(event) {
+        // Convert mouse position to normalized device coordinates (-1 to +1)
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        // Update the raycaster
+        raycaster.setFromCamera(mouse, camera);
+
+        // Check for intersections
+        const intersects = raycaster.intersectObject(gltf.scene, true);
+
+        if (intersects.length > 0) {
+          tooltip.style.display = "block";
+          tooltip.style.left = event.clientX + 10 + "px";
+          tooltip.style.top = event.clientY + 10 + "px";
+        } else {
+          tooltip.style.display = "none";
+        }
+      }
+    }, undefined, function (error) {
+      console.error("Error loading GLTF model:", error);
+    });
+
+    // 3D button
     const buttonGeometry = new THREE.BoxGeometry(0.1, 0.2, 0.1); 
     const buttonMaterial = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
     const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
@@ -146,18 +149,19 @@ loader1.load('models/bot.glb', function (gltf) {
     scene.add(button);
 
     function updateMaterials(model) {
-    model.traverse((child) => {
+      model.traverse((child) => {
         if (child.isMesh && child.material.type === 'MeshStandardMaterial') {
-            const oldMaterial = child.material;
-            const newMaterial = new THREE.MeshStandardMaterial({
-                map: oldMaterial.map,
-                color: oldMaterial.color,
-            });
-            child.material = newMaterial;
-            child.material.needsUpdate = true;
+          const oldMaterial = child.material;
+          const newMaterial = new THREE.MeshStandardMaterial({
+            map: oldMaterial.map,
+            color: oldMaterial.color,
+          });
+          child.material = newMaterial;
+          child.material.needsUpdate = true;
         }
-    });
-}
+      });
+    }
+
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     window.addEventListener('click', (event) => {
@@ -168,6 +172,7 @@ loader1.load('models/bot.glb', function (gltf) {
         window.location.href = "lift.html";
       }
     });
+
     // Camera Position
     camera.position.set(0, 1, 4);
 
@@ -190,6 +195,8 @@ loader1.load('models/bot.glb', function (gltf) {
       }
     });
 
+    let clock = new THREE.Clock();
+
     function animate() {
       requestAnimationFrame(animate);
 
@@ -205,6 +212,13 @@ loader1.load('models/bot.glb', function (gltf) {
       //boundaries 
       camera.position.x = Math.max(-1.2, Math.min(1.2, camera.position.x));  
       camera.position.z = Math.max(-3.6, Math.min(2, camera.position.z)); 
+
+      // Floating animation
+
+      if (botModel) {
+        const time = clock.getElapsedTime();
+        botModel.position.y = Math.sin(time) * 0.1 + 0.5;
+      }
 
       renderer.render(scene, camera);
     }
