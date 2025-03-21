@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <center>
+    <h1>PERIODIC TABLE</h1></center>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Periodic Table with 3D Atom Models</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', 'Roboto', 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0f10, #1a1c2c);
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-attachment: fixed;
+}
+h1{
+    font-size: 30px;
+    font-style: italic;
+    font
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    margin: 20px 0 40px;
+}
+
+.header h1 {
+    font-size: 42px;
+    font-weight: 800;
+    background: linear-gradient(to right, #64e3ff, #8a84ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+    letter-spacing: -1px;
+}
+
+.header p {
+    font-size: 18px;
+    color: #b0b5cc;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.periodic-table {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(60px, 80px));
+    grid-auto-rows: minmax(60px, 80px);
+    gap: 8px;
+    padding: 25px;
+    justify-content: center;
+    position: relative;
+    margin: 0 auto;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.element {
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    background: linear-gradient(145deg, #212334, #2a2e47);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Element category styling */
+.element[data-category="alkali-metal"] {
+    background: linear-gradient(145deg, #582828, #7a3838);
+}
+
+.element[data-category="alkaline-earth"] {
+    background: linear-gradient(145deg, #7e4516, #a65a1e);
+}
+
+.element[data-category="transition-metal"] {
+    background: linear-gradient(145deg, #6b6325, #8e832e);
+}
+
+.element[data-category="post-transition"] {
+    background: linear-gradient(145deg, #336b3d, #408c4f);
+}
+
+.element[data-category="metalloid"] {
+    background: linear-gradient(145deg, #2d6a69, #378a89);
+}
+
+.element[data-category="nonmetal"] {
+    background: linear-gradient(145deg, #285766, #346c7e);
+}
+
+.element[data-category="halogen"] {
+    background: linear-gradient(145deg, #4a3383, #5c40a3);
+}
+
+.element[data-category="noble-gas"] {
+    background: linear-gradient(145deg, #6b2a6e, #8a358d);
+}
+
+.element[data-category="lanthanide"] {
+    background: linear-gradient(145deg, #424280, #52528f);
+}
+
+.element[data-category="actinide"] {
+    background: linear-gradient(145deg, #6d345d, #8a4274);
+}
+
+.element[data-group='1'] { grid-column: 1; }
+.element[data-group='2'] { grid-column: 2; }
+.element[data-group='18'] { grid-column: 18; }
+
+/* Handle specific positioning for lanthanides and actinides */
+.element[data-period='6'][data-group='3'] { grid-column: 3; grid-row: 6; }
+.element[data-period='7'][data-group='3'] { grid-column: 3; grid-row: 7; }
+
+.element:hover {
+    transform: translateY(-8px) scale(1.05);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6), 0 0 15px rgba(255, 255, 255, 0.15);
+    z-index: 10;
+}
+
+.element .symbol {
+    font-size: 26px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.element .number {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    font-size: 12px;
+    opacity: 0.7;
+}
+
+.element .name {
+    font-size: 10px;
+    margin-top: 4px;
+    opacity: 0.9;
+    font-weight: 500;
+    text-align: center;
+    padding: 0 4px;
+}
+
+.element .mass {
+    font-size: 9px;
+    opacity: 0.6;
+    margin-top: 2px;
+}
+
+.element.selected {
+    transform: scale(1.15);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.4), 0 0 15px rgba(255, 255, 255, 0.2);
+    z-index: 20;
+}
+
+.table-labels {
+    display: grid;
+    grid-template-columns: repeat(18, minmax(60px, 80px));
+    gap: 8px;
+    padding: 0 25px;
+    justify-content: center;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    text-align: center;
+}
+
+.period-labels {
+    position: absolute;
+    left: 0;
+    top: 25px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0 10px;
+}
+
+.model-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 25px;
+    margin-top: 30px;
+}
+
+.model-info {
+    text-align: center;
+    margin-bottom: 30px;
+    max-width: 900px;
+    padding: 40px;
+    background: rgba(32, 36, 56, 0.8);
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+.model-info::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    opacity: 0.5;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.model-info h2 {
+    margin: 0 0 20px 0;
+    color: #ffffff;
+    font-size: 36px;
+    font-weight: 700;
+    position: relative;
+}
+
+.model-info p {
+    margin: 16px 0;
+    color: #d6d9e8;
+    font-size: 18px;
+    line-height: 1.8;
+    position: relative;
+}
+
+.element-properties {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.property {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+.property:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.property h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #8a84ff;
+}
+
+.property p {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+#atom-model {
+    width: 100%;
+    height: 600px;
+    background: linear-gradient(145deg, #1a1e35, #2a3048);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(32, 36, 56, 0.6);
+    border-radius: 16px;
+    max-width: 900px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    margin-right: 8px;
+}
+
+.legend-text {
+    font-size: 14px;
+    color: #d6d9e8;
+}
+
+.controls {
+    display: flex;
+    gap: 20px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.control-btn {
+    padding: 12px 24px;
+    background: linear-gradient(145deg, #2d3154, #393f6b);
+    border: none;
+    border-radius: 50px;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    outline: none;
+}
+
+.control-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(145deg, #393f6b, #454d82);
+}
+
+.control-btn:active {
+    transform: translateY(1px);
+}
+
+.tooltip {
+    position: absolute;
+    background: rgba(24, 28, 47, 0.95);
+    border-radius: 8px;
+    padding: 15px;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 220px;
+    opacity: 0;
+}
+
+.tooltip h3 {
+    margin: 0 0 5px 0;
+    font-size: 18px;
+    color: #8a84ff;
+}
+
+.tooltip p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #d6d9e8;
+}
+
+.search-bar {
+    margin: 20px auto;
+    width: 100%;
+    max-width: 600px;
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 16px 20px;
+    padding-left: 50px;
+    font-size: 18px;
+    background: rgba(32, 36, 56, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: rgba(138, 132, 255, 0.5);
+    box-shadow: 0 4px 20px rgba(138, 132, 255, 0.2);
+}
+
+.search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.footer {
+    text-align: center;
+    padding: 30px 0;
+    margin-top: 40px;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animation keyframes */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.electron {
+    animation: pulse 2s infinite, rotate 20s linear infinite;
+}
+
+.animate-in {
+    animation: fadeIn 0.8s ease forwards;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 1200px) {
+    .periodic-table {
+        grid-template-columns: repeat(18, minmax(50px, 65px));
+        grid-auto-rows: minmax(50px, 65px);
+        gap: 6px;
+        padding: 15px;
+    }
+    
+    .element .symbol {
+        font-size: 20px;
+    }
+    
+    .element .name {
+        font-size: 9px;
+    }
+    
+    .model-info {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 900px) {
+    .header h1 {
+        font-size: 36px;
+    }
+    
+    .periodic-table {
+        grid-template-columns: repeat(18, minmax(40px, 50px));
+        grid-auto-rows: minmax(40px, 50px);
+        gap: 4px;
+    }
+    
+    .element .symbol {
+        font-size: 16px;
+    }
+    
+    .element .name {
+        font-size: 8px;
+    }
+    
+    .element .number {
+        font-size: 10px;
+    }
+    
+    .model-info h2 {
+        font-size: 28px;
+    }
+    
+    .model-info p {
+        font-size: 16px;
+    }
+    
+    #atom-model {
+        height: 450px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header h1 {
+        font-size: 30px;
+    }
+    
+    .header p {
+        font-size: 16px;
+    }
+    
+    .periodic-table {
+        grid-template-columns: repeat(9, 1fr);
+        overflow-x: auto;
+        max-width: 100%;
+        padding: 10px;
+    }
+    
+    .element {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .element .symbol {
+        font-size: 14px;
+    }
+    
+    .element .name {
+        font-size: 7px;
+    }
+    
+    .model-info {
+        padding: 20px;
+    }
+    
+    .model-info h2 {
+        font-size: 24px;
+    }
+    
+    .model-info p {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+    
+    #atom-model {
+        height: 350px;
+    }
+    
+    .search-input {
+        padding: 12px 15px 12px 45px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 24px;
+    }
+    
+    .periodic-table {
+        gap: 3px;
+    }
+    
+    .element {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .element .symbol {
+        font-size: 12px;
+    }
+    
+    .element .name {
+        display: none;
+    }
+    
+    .element:hover .name {
+        display: block;
+        position: absolute;
+        bottom: -20px;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 3px 6px;
+        border-radius: 4px;
+        z-index: 30;
+    }
+    
+    .model-info h2 {
+        font-size: 20px;
+    }
+    
+    #atom-model {
+        height: 300px;
+    }
+    
+    .controls {
+        gap: 10px;
+    }
+    
+    .control-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="periodic-table">
+            
+        </div>
+        <div class="model-container" id="model-container">
+            <div class="model-info">
+                <h2>Select an element to view its atomic model</h2>
+                <p>Click on any element above to see a 3D model of its atomic structure</p>
+            </div>
+            <div id="atom-model"></div>
+        </div>
+    </div>
+
+    <script>
+        const elements = [
+    { number: 1, symbol: 'H', name: 'Hydrogen', color: '#FF8F00', electrons: [1], neutrons: 0, protons: 1 },
+    { number: 2, symbol: 'He', name: 'Helium', color: '#9C27B0', electrons: [2], neutrons: 2, protons: 2 },
+    { number: 3, symbol: 'Li', name: 'Lithium', color: '#8E24AA', electrons: [2, 1], neutrons: 4, protons: 3 },
+    { number: 4, symbol: 'Be', name: 'Beryllium', color: '#7B1FA2', electrons: [2, 2], neutrons: 5, protons: 4 },
+    { number: 5, symbol: 'B', name: 'Boron', color: '#6A1B9A', electrons: [2, 3], neutrons: 6, protons: 5 },
+    { number: 6, symbol: 'C', name: 'Carbon', color: '#607D8B', electrons: [2, 4], neutrons: 6, protons: 6 },
+    { number: 7, symbol: 'N', name: 'Nitrogen', color: '#546E7A', electrons: [2, 5], neutrons: 7, protons: 7 },
+    { number: 8, symbol: 'O', name: 'Oxygen', color: '#F44336', electrons: [2, 6], neutrons: 8, protons: 8 },
+    { number: 9, symbol: 'F', name: 'Fluorine', color: '#E91E63', electrons: [2, 7], neutrons: 10, protons: 9 },
+    { number: 10, symbol: 'Ne', name: 'Neon', color: '#9C27B0', electrons: [2, 8], neutrons: 10, protons: 10 },
+    { number: 11, symbol: 'Na', name: 'Sodium', color: '#0D47A1', electrons: [2, 8, 1], neutrons: 12, protons: 11 },
+    { number: 12, symbol: 'Mg', name: 'Magnesium', color: '#1565C0', electrons: [2, 8, 2], neutrons: 12, protons: 12 },
+    { number: 13, symbol: 'Al', name: 'Aluminum', color: '#1976D2', electrons: [2, 8, 3], neutrons: 14, protons: 13 },
+    { number: 14, symbol: 'Si', name: 'Silicon', color: '#1E88E5', electrons: [2, 8, 4], neutrons: 14, protons: 14 },
+    { number: 15, symbol: 'P', name: 'Phosphorus', color: '#2196F3', electrons: [2, 8, 5], neutrons: 16, protons: 15 },
+    { number: 16, symbol: 'S', name: 'Sulfur', color: '#FFC107', electrons: [2, 8, 6], neutrons: 16, protons: 16 },
+    { number: 17, symbol: 'Cl', name: 'Chlorine', color: '#4CAF50', electrons: [2, 8, 7], neutrons: 18, protons: 17 },
+    { number: 18, symbol: 'Ar', name: 'Argon', color: '#9C27B0', electrons: [2, 8, 8], neutrons: 22, protons: 18 },
+    { number: 19, symbol: 'K', name: 'Potassium', color: '#0D47A1', electrons: [2, 8, 8, 1], neutrons: 20, protons: 19 },
+    { number: 20, symbol: 'Ca', name: 'Calcium', color: '#1565C0', electrons: [2, 8, 8, 2], neutrons: 20, protons: 20 },
+    { number: 21, symbol: 'Sc', name: 'Scandium', color: '#4DB6AC', electrons: [2, 8, 9, 2], neutrons: 24, protons: 21 },
+    { number: 22, symbol: 'Ti', name: 'Titanium', color: '#4DB6AC', electrons: [2, 8, 10, 2], neutrons: 26, protons: 22 },
+    { number: 23, symbol: 'V', name: 'Vanadium', color: '#4DB6AC', electrons: [2, 8, 11, 2], neutrons: 28, protons: 23 },
+    { number: 24, symbol: 'Cr', name: 'Chromium', color: '#4DB6AC', electrons: [2, 8, 13, 1], neutrons: 28, protons: 24 },
+    { number: 25, symbol: 'Mn', name: 'Manganese', color: '#4DB6AC', electrons: [2, 8, 13, 2], neutrons: 30, protons: 25 },
+    { number: 26, symbol: 'Fe', name: 'Iron', color: '#4DB6AC', electrons: [2, 8, 14, 2], neutrons: 30, protons: 26 },
+    { number: 27, symbol: 'Co', name: 'Cobalt', color: '#4DB6AC', electrons: [2, 8, 15, 2], neutrons: 32, protons: 27 },
+    { number: 28, symbol: 'Ni', name: 'Nickel', color: '#4DB6AC', electrons: [2, 8, 16, 2], neutrons: 31, protons: 28 },
+    { number: 29, symbol: 'Cu', name: 'Copper', color: '#4DB6AC', electrons: [2, 8, 18, 1], neutrons: 35, protons: 29 },
+    { number: 30, symbol: 'Zn', name: 'Zinc', color: '#4DB6AC', electrons: [2, 8, 18, 2], neutrons: 35, protons: 30 },
+    { number: 31, symbol: 'Ga', name: 'Gallium', color: '#1976D2', electrons: [2, 8, 18, 3], neutrons: 39, protons: 31 },
+    { number: 32, symbol: 'Ge', name: 'Germanium', color: '#1E88E5', electrons: [2, 8, 18, 4], neutrons: 41, protons: 32 },
+    { number: 33, symbol: 'As', name: 'Arsenic', color: '#2196F3', electrons: [2, 8, 18, 5], neutrons: 42, protons: 33 },
+    { number: 34, symbol: 'Se', name: 'Selenium', color: '#FFC107', electrons: [2, 8, 18, 6], neutrons: 45, protons: 34 },
+    { number: 35, symbol: 'Br', name: 'Bromine', color: '#4CAF50', electrons: [2, 8, 18, 7], neutrons: 45, protons: 35 },
+    { number: 36, symbol: 'Kr', name: 'Krypton', color: '#9C27B0', electrons: [2, 8, 18, 8], neutrons: 48, protons: 36 },
+    { number: 37, symbol: 'Rb', name: 'Rubidium', color: '#0D47A1', electrons: [2, 8, 18, 8, 1], neutrons: 48, protons: 37 },
+    { number: 38, symbol: 'Sr', name: 'Strontium', color: '#1565C0', electrons: [2, 8, 18, 8, 2], neutrons: 50, protons: 38 },
+    { number: 39, symbol: 'Y', name: 'Yttrium', color: '#4DB6AC', electrons: [2, 8, 18, 9, 2], neutrons: 50, protons: 39 },
+    { number: 40, symbol: 'Zr', name: 'Zirconium', color: '#4DB6AC', electrons: [2, 8, 18, 10, 2], neutrons: 51, protons: 40 },
+    { number: 41, symbol: 'Nb', name: 'Niobium', color: '#4DB6AC', electrons: [2, 8, 18, 12, 1], neutrons: 52, protons: 41 },
+    { number: 42, symbol: 'Mo', name: 'Molybdenum', color: '#4DB6AC', electrons: [2, 8, 18, 13, 1], neutrons: 54, protons: 42 },
+    { number: 43, symbol: 'Tc', name: 'Technetium', color: '#4DB6AC', electrons: [2, 8, 18, 13, 2], neutrons: 55, protons: 43 },
+    { number: 44, symbol: 'Ru', name: 'Ruthenium', color: '#4DB6AC', electrons: [2, 8, 18, 15, 1], neutrons: 57, protons: 44 },
+    { number: 45, symbol: 'Rh', name: 'Rhodium', color: '#4DB6AC', electrons: [2, 8, 18, 16, 1], neutrons: 58, protons: 45 },
+    { number: 46, symbol: 'Pd', name: 'Palladium', color: '#4DB6AC', electrons: [2, 8, 18, 18], neutrons: 60, protons: 46 },
+    { number: 47, symbol: 'Ag', name: 'Silver', color: '#4DB6AC', electrons: [2, 8, 18, 18, 1], neutrons: 61, protons: 47 },
+    { number: 48, symbol: 'Cd', name: 'Cadmium', color: '#4DB6AC', electrons: [2, 8, 18, 18, 2], neutrons: 64, protons: 48 },
+    { number: 49, symbol: 'In', name: 'Indium', color: '#1976D2', electrons: [2, 8, 18, 18, 3], neutrons: 66, protons: 49 },
+    { number: 50, symbol: 'Sn', name: 'Tin', color: '#1E88E5', electrons: [2, 8, 18, 18, 4], neutrons: 69, protons: 50 },
+    { number: 51, symbol: 'Sb', name: 'Antimony', color: '#2196F3', electrons: [2, 8, 18, 18, 5], neutrons: 71, protons: 51 },
+    { number: 52, symbol: 'Te', name: 'Tellurium', color: '#FFC107', electrons: [2, 8, 18, 18, 6], neutrons: 76, protons: 52 },
+    { number: 53, symbol: 'I', name: 'Iodine', color: '#4CAF50', electrons: [2, 8, 18, 18, 7], neutrons: 74, protons: 53 },
+    { number: 54, symbol: 'Xe', name: 'Xenon', color: '#9C27B0', electrons: [2, 8, 18, 18, 8], neutrons: 77, protons: 54 },
+    { number: 55, symbol: 'Cs', name: 'Cesium', color: '#0D47A1', electrons: [2, 8, 18, 18, 8, 1], neutrons: 78, protons: 55 },
+    { number: 56, symbol: 'Ba', name: 'Barium', color: '#1565C0', electrons: [2, 8, 18, 18, 8, 2], neutrons: 81, protons: 56 },
+    { number: 57, symbol: 'La', name: 'Lanthanum', color: '#FF5722', electrons: [2, 8, 18, 18, 9, 2], neutrons: 82, protons: 57 },
+    { number: 58, symbol: 'Ce', name: 'Cerium', color: '#FF5722', electrons: [2, 8, 18, 19, 9, 2], neutrons: 82, protons: 58 },
+    { number: 59, symbol: 'Pr', name: 'Praseodymium', color: '#FF5722', electrons: [2, 8, 18, 21, 8, 2], neutrons: 82, protons: 59 },
+    { number: 60, symbol: 'Nd', name: 'Neodymium', color: '#FF5722', electrons: [2, 8, 18, 22, 8, 2], neutrons: 84, protons: 60 },
+    { number: 61, symbol: 'Pm', name: 'Promethium', color: '#FF5722', electrons: [2, 8, 18, 23, 8, 2], neutrons: 84, protons: 61 },
+    { number: 62, symbol: 'Sm', name: 'Samarium', color: '#FF5722', electrons: [2, 8, 18, 24, 8, 2], neutrons: 88, protons: 62 },
+    { number: 63, symbol: 'Eu', name: 'Europium', color: '#FF5722', electrons: [2, 8, 18, 25, 8, 2], neutrons: 89, protons: 63 },
+    { number: 64, symbol: 'Gd', name: 'Gadolinium', color: '#FF5722', electrons: [2, 8, 18, 25, 9, 2], neutrons: 93, protons: 64 },
+    { number: 65, symbol: 'Tb', name: 'Terbium', color: '#FF5722', electrons: [2, 8, 18, 27, 8, 2], neutrons: 94, protons: 65 },
+    { number: 66, symbol: 'Dy', name: 'Dysprosium', color: '#FF5722', electrons: [2, 8, 18, 28, 8, 2], neutrons: 97, protons: 66 },
+    { number: 67, symbol: 'Ho', name: 'Holmium', color: '#FF5722', electrons: [2, 8, 18, 29, 8, 2], neutrons: 98, protons: 67 },
+    { number: 68, symbol: 'Er', name: 'Erbium', color: '#FF5722', electrons: [2, 8, 18, 30, 8, 2], neutrons: 99, protons: 68 },
+    { number: 69, symbol: 'Tm', name: 'Thulium', color: '#FF5722', electrons: [2, 8, 18, 31, 8, 2], neutrons: 100, protons: 69 },
+    { number: 70, symbol: 'Yb', name: 'Ytterbium', color: '#FF5722', electrons: [2, 8, 18, 32, 8, 2], neutrons: 103, protons: 70 },
+    { number: 71, symbol: 'Lu', name: 'Lutetium', color: '#FF5722', electrons: [2, 8, 18, 32, 9, 2], neutrons: 104, protons: 71 },
+    { number: 72, symbol: 'Hf', name: 'Hafnium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 10, 2], neutrons: 106, protons: 72 },
+    { number: 73, symbol: 'Ta', name: 'Tantalum', color: '#4DB6AC', electrons: [2, 8, 18, 32, 11, 2], neutrons: 108, protons: 73 },
+    { number: 74, symbol: 'W', name: 'Tungsten', color: '#4DB6AC', electrons: [2, 8, 18, 32, 12, 2], neutrons: 110, protons: 74 },
+    { number: 75, symbol: 'Re', name: 'Rhenium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 13, 2], neutrons: 111, protons: 75 },
+    { number: 76, symbol: 'Os', name: 'Osmium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 14, 2], neutrons: 114, protons: 76 },
+    { number: 77, symbol: 'Ir', name: 'Iridium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 15, 2], neutrons: 115, protons: 77 },
+    { number: 78, symbol: 'Pt', name: 'Platinum', color: '#4DB6AC', electrons: [2, 8, 18, 32, 17, 1], neutrons: 117, protons: 78 },
+    { number: 79, symbol: 'Au', name: 'Gold', color: '#4DB6AC', electrons: [2, 8, 18, 32, 18, 1], neutrons: 118, protons: 79 },
+    { number: 80, symbol: 'Hg', name: 'Mercury', color: '#4DB6AC', electrons: [2, 8, 18, 32, 18, 2], neutrons: 121, protons: 80 },
+    { number: 81, symbol: 'Tl', name: 'Thallium', color: '#1976D2', electrons: [2, 8, 18, 32, 18, 3], neutrons: 123, protons: 81 },
+    { number: 82, symbol: 'Pb', name: 'Lead', color: '#1E88E5', electrons: [2, 8, 18, 32, 18, 4], neutrons: 125, protons: 82 },
+    { number: 83, symbol: 'Bi', name: 'Bismuth', color: '#2196F3', electrons: [2, 8, 18, 32, 18, 5], neutrons: 126, protons: 83 },
+    { number: 84, symbol: 'Po', name: 'Polonium', color: '#FFC107', electrons: [2, 8, 18, 32, 18, 6], neutrons: 125, protons: 84 },
+    { number: 85, symbol: 'At', name: 'Astatine', color: '#4CAF50', electrons: [2, 8, 18, 32, 18, 7], neutrons: 125, protons: 85 },
+    { number: 86, symbol: 'Rn', name: 'Radon', color: '#9C27B0', electrons: [2, 8, 18, 32, 18, 8], neutrons: 136, protons: 86 },
+    { number: 87, symbol: 'Fr', name: 'Francium', color: '#0D47A1', electrons: [2, 8, 18, 32, 18, 8, 1], neutrons: 136, protons: 87 },
+    { number: 88, symbol: 'Ra', name: 'Radium', color: '#1565C0', electrons: [2, 8, 18, 32, 18, 8, 2], neutrons: 138, protons: 88 },
+    { number: 89, symbol: 'Ac', name: 'Actinium', color: '#00BFA5', electrons: [2, 8, 18, 32, 18, 9, 2], neutrons: 138, protons: 89 },
+    { number: 90, symbol: 'Th', name: 'Thorium', color: '#00BFA5', electrons: [2, 8, 18, 32, 18, 10, 2], neutrons: 142, protons: 90 },
+    { number: 91, symbol: 'Pa', name: 'Protactinium', color: '#00BFA5', electrons: [2, 8, 18, 32, 20, 9, 2], neutrons: 140, protons: 91 },
+    { number: 92, symbol: 'U', name: 'Uranium', color: '#00BFA5', electrons: [2, 8, 18, 32, 21, 9, 2], neutrons: 146, protons: 92 },
+    { number: 93, symbol: 'Np', name: 'Neptunium', color: '#00BFA5', electrons: [2, 8, 18, 32, 22, 9, 2], neutrons: 144, protons: 93 },
+    { number: 94, symbol: 'Pu', name: 'Plutonium', color: '#00BFA5', electrons: [2, 8, 18, 32, 24, 8, 2], neutrons: 150, protons: 94 },
+    { number: 95, symbol: 'Am', name: 'Americium', color: '#00BFA5', electrons: [2, 8, 18, 32, 25, 8, 2], neutrons: 148, protons: 95 },
+    { number: 96, symbol: 'Cm', name: 'Curium', color: '#00BFA5', electrons: [2, 8, 18, 32, 25, 9, 2], neutrons: 151, protons: 96 },
+    { number: 97, symbol: 'Bk', name: 'Berkelium', color: '#00BFA5', electrons: [2, 8, 18, 32, 27, 8, 2], neutrons: 150, protons: 97 },
+    { number: 98, symbol: 'Cf', name: 'Californium', color: '#00BFA5', electrons: [2, 8, 18, 32, 28, 8, 2], neutrons: 153, protons: 98 },
+    { number: 99, symbol: 'Es', name: 'Einsteinium', color: '#00BFA5', electrons: [2, 8, 18, 32, 29, 8, 2], neutrons: 153, protons: 99 },
+    { number: 100, symbol: 'Fm', name: 'Fermium', color: '#00BFA5', electrons: [2, 8, 18, 32, 30, 8, 2], neutrons: 157, protons: 100 },
+    { number: 101, symbol: 'Md', name: 'Mendelevium', color: '#00BFA5', electrons: [2, 8, 18, 32, 31, 8, 2], neutrons: 157, protons: 101 },
+    { number: 102, symbol: 'No', name: 'Nobelium', color: '#00BFA5', electrons: [2, 8, 18, 32, 32, 8, 2], neutrons: 157, protons: 102 },
+    { number: 103, symbol: 'Lr', name: 'Lawrencium', color: '#00BFA5', electrons: [2, 8, 18, 32, 32, 9, 2], neutrons: 159, protons: 103 },
+    { number: 104, symbol: 'Rf', name: 'Rutherfordium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 10, 2], neutrons: 157, protons: 104 },
+    { number: 105, symbol: 'Db', name: 'Dubnium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 11, 2], neutrons: 157, protons: 105 },
+    { number: 106, symbol: 'Sg', name: 'Seaborgium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 12, 2], neutrons: 157, protons: 106 },
+    { number: 107, symbol: 'Bh', name: 'Bohrium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 13, 2], neutrons: 155, protons: 107 },
+    { number: 108, symbol: 'Hs', name: 'Hassium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 14, 2], neutrons: 157, protons: 108 },
+    { number: 109, symbol: 'Mt', name: 'Meitnerium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 15, 2], neutrons: 159, protons: 109 },
+    { number: 110, symbol: 'Ds', name: 'Darmstadtium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 17, 1], neutrons: 151, protons: 110 },
+    { number: 111, symbol: 'Rg', name: 'Roentgenium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 18, 1], neutrons: 161, protons: 111 },
+    { number: 112, symbol: 'Cn', name: 'Copernicium', color: '#4DB6AC', electrons: [2, 8, 18, 32, 32, 18, 2], neutrons: 165, protons: 112 },
+    { number: 113, symbol: 'Nh', name: 'Nihonium', color: '#1976D2', electrons: [2, 8, 18, 32, 32, 18, 3], neutrons: 170, protons: 113 },
+    { number: 114, symbol: 'Fl', name: 'Flerovium', color: '#1E88E5', electrons: [2, 8, 18, 32, 32, 18, 4], neutrons: 175, protons: 114 },
+    { number: 115, symbol: 'Mc', name: 'Moscovium', color: '#2196F3', electrons: [2, 8, 18, 32, 32, 18, 5], neutrons: 174, protons: 115 },
+    { number: 116, symbol: 'Lv', name: 'Livermorium', color: '#FFC107', electrons: [2, 8, 18, 32, 32, 18, 6], neutrons: 177, protons: 116 },
+    { number: 117, symbol: 'Ts', name: 'Tennessine', color: '#4CAF50', electrons: [2, 8, 18, 32, 32, 18, 7], neutrons: 178, protons: 117 },
+    { number: 118, symbol: 'Og', name: 'Oganesson', color: '#9C27B0', electrons: [2, 8, 18, 32, 32, 18, 8], neutrons: 176, protons: 118 }
+];
+
+        // Render the periodic table
+        const periodicTable = document.querySelector('.periodic-table');
+        elements.forEach(element => {
+            const elementDiv = document.createElement('div');
+            elementDiv.className = 'element';
+            elementDiv.style.backgroundColor = element.color;
+            elementDiv.innerHTML = `
+                <span class="number">${element.number}</span>
+                <span class="symbol">${element.symbol}</span>
+                <span class="name">${element.name}</span>
+            `;
+            elementDiv.addEventListener('click', () => showAtomModel(element));
+            periodicTable.appendChild(elementDiv);
+        });
+
+        // Three.js variables
+        let scene, camera, renderer, model;
+        let animationId;
+
+        // Initialize Three.js
+        function initThree() {
+            const container = document.getElementById('atom-model');
+            
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+            
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.z = 15;
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            
+            // Clear container and add renderer
+            container.innerHTML = '';
+            container.appendChild(renderer.domElement);
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0x404040);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(1, 1, 1);
+            scene.add(directionalLight);
+            
+            // Handle window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+
+        // Create atom model
+        function createAtomModel(element) {
+            // Remove previous model if exists
+            if (model) {
+                scene.remove(model);
+            }
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            model = new THREE.Group();
+            
+            // Create nucleus
+            const nucleusGeometry = new THREE.SphereGeometry(2, 32, 32);
+            const nucleusMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0xCCCCCC,
+                emissive: 0x444444,
+                specular: 0xFFFFFF,
+                shininess: 30
+            });
+            const nucleus = new THREE.Mesh(nucleusGeometry, nucleusMaterial);
+            model.add(nucleus);
+            
+            // Create protons and neutrons inside the nucleus
+            const particleGeometry = new THREE.SphereGeometry(0.5, 16, 16);
+            
+            // Protons (red)
+            const protonMaterial = new THREE.MeshPhongMaterial({ color: 0xFF0000 });
+            
+            // Neutrons (white)
+            const neutronMaterial = new THREE.MeshPhongMaterial({ color: 0xFFFFFF });
+            
+            // Position protons and neutrons randomly within nucleus
+            for (let i = 0; i < element.protons; i++) {
+                const proton = new THREE.Mesh(particleGeometry, protonMaterial);
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const radius = Math.random() * 1.2;
+                proton.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                proton.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                proton.position.z = radius * Math.cos(phi);
+                nucleus.add(proton);
+            }
+            
+            for (let i = 0; i < element.neutrons; i++) {
+                const neutron = new THREE.Mesh(particleGeometry, neutronMaterial);
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.random() * Math.PI;
+                const radius = Math.random() * 1.2;
+                neutron.position.x = radius * Math.sin(phi) * Math.cos(theta);
+                neutron.position.y = radius * Math.sin(phi) * Math.sin(theta);
+                neutron.position.z = radius * Math.cos(phi);
+                nucleus.add(neutron);
+            }
+            
+            // Create electron shells
+            element.electrons.forEach((electronsInShell, shellIndex) => {
+                const shellRadius = 4 + (shellIndex * 2);
+                const shellGeometry = new THREE.TorusGeometry(shellRadius, 0.05, 16, 100);
+                const shellMaterial = new THREE.MeshBasicMaterial({ 
+                    color: 0x3333FF,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                
+                // Create three shells at perpendicular angles for 3D effect
+                const shell1 = new THREE.Mesh(shellGeometry, shellMaterial);
+                model.add(shell1);
+                
+                const shell2 = new THREE.Mesh(shellGeometry, shellMaterial);
+                shell2.rotation.x = Math.PI / 2;
+                model.add(shell2);
+                
+                const shell3 = new THREE.Mesh(shellGeometry, shellMaterial);
+                shell3.rotation.y = Math.PI / 2;
+                model.add(shell3);
+                
+                // Add electrons to shell
+                const electronGeometry = new THREE.SphereGeometry(0.25, 16, 16);
+                const electronMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0x00FFFF,
+                    emissive: 0x007777
+                });
+                
+                // Position electrons evenly around shell
+                for (let i = 0; i < electronsInShell; i++) {
+                    const electronGroup = new THREE.Group();
+                    const angle = (i / electronsInShell) * Math.PI * 2;
+                    
+                    const electron = new THREE.Mesh(electronGeometry, electronMaterial);
+                    electron.position.x = shellRadius * Math.cos(angle);
+                    electron.position.y = shellRadius * Math.sin(angle);
+                    
+                    electronGroup.add(electron);
+                    electronGroup.userData = { 
+                        angle: angle,
+                        shellRadius: shellRadius,
+                        speed: 0.005 - (shellIndex * 0.001)
+                    };
+                    
+                    model.add(electronGroup);
+                }
+            });
+            
+            scene.add(model);
+            
+            // Update model info display
+            const modelInfo = document.querySelector('.model-info');
+            modelInfo.innerHTML = `
+                <h2>${element.name} (${element.symbol})</h2>
+                <p>Atomic Number: ${element.number}</p>
+                <p>Protons: ${element.protons}</p>
+                <p>Neutrons: ${element.neutrons}</p>
+                <p>Electrons: ${element.electrons.reduce((a, b) => a + b, 0)}</p>
+                <p>Electron Configuration: ${element.electrons.join('-')}</p>
+            `;
+            
+            // Start animation
+            animate();
+        }
+        
+        // Animate the atom model
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            
+            if (model) {
+                // Rotate nucleus slowly
+                model.children[0].rotation.x += 0.005;
+                model.children[0].rotation.y += 0.003;
+                
+                // Rotate entire model for interactive viewing
+                model.rotation.y += 0.002;
+                
+                // Animate electrons
+                model.children.forEach(child => {
+                    if (child.userData && child.userData.hasOwnProperty('angle')) {
+                        child.userData.angle += child.userData.speed;
+                        child.children[0].position.x = child.userData.shellRadius * Math.cos(child.userData.angle);
+                        child.children[0].position.y = child.userData.shellRadius * Math.sin(child.userData.angle);
+                    }
+                });
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Show atom model for selected element
+        function showAtomModel(element) {
+            if (!scene) {
+                initThree();
+            }
+            createAtomModel(element);
+
+            // Scroll to the visualizing section
+            const modelContainer = document.getElementById('model-container');
+            modelContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Initialize with first element selected
+        document.addEventListener('DOMContentLoaded', () => {
+            initThree();
+            showAtomModel(elements[0]);
+        });
+    </script>
+</body>
+</html>

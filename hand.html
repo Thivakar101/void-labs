@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>hand bone Exhibit</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            margin: 0;
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            height: 100vh;
+            background-color: #000;
+            color: #00ff00;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        .left {
+            width: 50%;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .right {
+            width: 50%;
+            padding: 20px;
+            background-color: #222;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .right h1 {
+            margin-top: 0;
+            color: #ff00ff;
+        }
+        .right p {
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        .back-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #ff00ff;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1em;
+        }
+        .back-button:hover {
+            background-color: #ff66ff;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left">
+            <canvas id="modelCanvas"></canvas>
+        </div>
+        <div class="right">
+            <h1>hand bone Exhibit</h1>
+            <p>
+                The hand is made up of 27 bones, which are divided into three main groups: the carpals, metacarpals, and phalanges. The carpals consist of eight small bones forming the wrist, allowing for flexibility and movement. The metacarpals are the five bones forming the palm, connecting the wrist to the fingers. The phalanges include 14 bones that make up the fingers and thumb, enabling fine motor skills and precise movements. Together, these bones provide structure, support, and a wide range of motion for various hand functions.
+            </p>
+            <a href="biolab.html" class="back-button">Go Back</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        const canvas = document.getElementById('modelCanvas');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        controls.enableZoom = true;
+
+        camera.position.set(0, 1, 2);
+        controls.update();
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(5, 5, 5);
+        scene.add(directionalLight);
+
+        const loader = new THREE.GLTFLoader();
+        loader.load('hb.glb', function(gltf) {
+            const model = gltf.scene;
+            scene.add(model);
+        }, undefined, function(error) {
+            console.error(error);
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = canvas.clientWidth / canvas.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        });
+    </script>
+</body>
+</html>

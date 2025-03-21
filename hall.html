@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VOIDLABS.inc</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Fullscreen toggle
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'F11') {
+        event.preventDefault();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+        } else {
+          document.exitFullscreen();
+        }
+      }
+    });
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', onWindowResize)
+
+    const wallHeight = 1.9;
+
+    // LIGHTING
+    function addLight(x, y, z) {
+      const light = new THREE.PointLight(0xffffff, 1.5, 9);
+      light.position.set(x, y, z);
+      light.castShadow = true;
+      scene.add(light);
+    }
+
+    addLight(0, wallHeight, 0);
+    addLight(-4.5, wallHeight, -4.5);
+    addLight(4.5, wallHeight, -4.5);
+    addLight(-4.5, wallHeight, 4.5);
+    addLight(4.5, wallHeight, 4.5);
+
+    // Load GLTF Model
+    const loader = new THREE.GLTFLoader();
+    loader.load('hall.glb', function(gltf) {
+      gltf.scene.position.set(0, 0, 0);
+      gltf.scene.scale.set(4, 4, 4);
+
+      gltf.scene.traverse((child) => {
+        if (child.isMesh) {
+          child.material = new THREE.MeshStandardMaterial({
+            color: child.material.color,
+          });
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+
+      scene.add(gltf.scene);
+    }, undefined, function(error) {
+      console.error('Error loading GLTF model:', error);
+    });
+
+// Load GLTF Model
+const loader1 = new THREE.GLTFLoader();
+loader1.load('bot.glb', function (gltf) {
+  gltf.scene.position.set(-1.2, 0.5, -3.2);
+  gltf.scene.scale.set(0.7, 0.7, 0.7);
+  gltf.scene.rotation.x = Math.PI;
+  gltf.scene.rotation.y = 2.7;
+
+  gltf.scene.traverse((child) => {
+    if (child.isMesh) {
+      child.material = new THREE.MeshStandardMaterial({
+        color: child.material.color,
+      });
+      child.castShadow = true;
+      child.receiveShadow = true;
+    }
+  });
+
+  scene.add(gltf.scene);
+  
+  // Add event listener for hover detection
+  document.addEventListener("mousemove", onMouseMove);
+
+  // Raycaster for detecting mouse hover
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const tooltip = document.createElement("div");
+
+  // Style the tooltip
+  tooltip.style.position = "absolute";
+  tooltip.style.background = "rgba(0, 0, 0, 0.7)";
+  tooltip.style.color = "#fff";
+  tooltip.style.padding = "5px 10px";
+  tooltip.style.borderRadius = "5px";
+  tooltip.style.fontSize = "14px";
+  tooltip.style.display = "none";
+  tooltip.style.pointerEvents = "none";
+  tooltip.innerHTML = "Welcome to OLabs";
+  document.body.appendChild(tooltip);
+
+  function onMouseMove(event) {
+    // Convert mouse position to normalized device coordinates (-1 to +1)
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // Update the raycaster
+    raycaster.setFromCamera(mouse, camera);
+
+    // Check for intersections
+    const intersects = raycaster.intersectObject(gltf.scene, true);
+
+    if (intersects.length > 0) {
+      tooltip.style.display = "block";
+      tooltip.style.left = event.clientX + 10 + "px";
+      tooltip.style.top = event.clientY + 10 + "px";
+    } else {
+      tooltip.style.display = "none";
+    }
+  }
+}, undefined, function (error) {
+  console.error("Error loading GLTF model:", error);
+});
+    //3D button
+    const buttonGeometry = new THREE.BoxGeometry(0.1, 0.2, 0.1); 
+    const buttonMaterial = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
+    const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
+    button.position.set(0.6, 0.92, -4);
+    scene.add(button);
+
+    function updateMaterials(model) {
+    model.traverse((child) => {
+        if (child.isMesh && child.material.type === 'MeshStandardMaterial') {
+            const oldMaterial = child.material;
+            const newMaterial = new THREE.MeshStandardMaterial({
+                map: oldMaterial.map,
+                color: oldMaterial.color,
+            });
+            child.material = newMaterial;
+            child.material.needsUpdate = true;
+        }
+    });
+}
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    window.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      if (raycaster.intersectObject(button).length > 0) {
+        window.location.href = "lift.html";
+      }
+    });
+    // Camera Position
+    camera.position.set(0, 1, 4);
+
+    // Movement Controls
+    const speed = 0.05;
+    const keys = { w: false, a: false, s: false, d: false };
+    let isMouseDown = false;
+    let previousMouseX = 0;
+    const rotationSpeed = 0.005;
+
+    window.addEventListener('keydown', (event) => { keys[event.key.toLowerCase()] = true; });
+    window.addEventListener('keyup', (event) => { keys[event.key.toLowerCase()] = false; });
+
+    window.addEventListener('mousedown', (event) => { isMouseDown = true; previousMouseX = event.clientX; });
+    window.addEventListener('mouseup', () => { isMouseDown = false; });
+    window.addEventListener('mousemove', (event) => {
+      if (isMouseDown) {
+        camera.rotation.y -= (event.clientX - previousMouseX) * rotationSpeed;
+        previousMouseX = event.clientX;
+      }
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      const direction = new THREE.Vector3();
+      camera.getWorldDirection(direction);
+      const right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0)).normalize();
+
+      if (keys.w) camera.position.addScaledVector(direction, speed);
+      if (keys.s) camera.position.addScaledVector(direction, -speed);
+      if (keys.a) camera.position.addScaledVector(right, -speed);
+      if (keys.d) camera.position.addScaledVector(right, speed);
+
+      //boundaries 
+      camera.position.x = Math.max(-1.2, Math.min(1.2, camera.position.x));  
+      camera.position.z = Math.max(-3.6, Math.min(2, camera.position.z)); 
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>

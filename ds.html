@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Data Structure Simulator</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #111;
+            color: #33ff33;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Press Start 2P', cursive;
+            text-shadow: 0 0 5px #33ff33;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #222;
+            border: 2px solid #33ff33;
+            border-radius: 4px;
+        }
+        
+        button {
+            background-color: #222;
+            color: #33ff33;
+            border: 2px solid #33ff33;
+            padding: 8px 15px;
+            margin: 5px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background-color: #33ff33;
+            color: #222;
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+        
+        input {
+            background-color: #222;
+            color: #33ff33;
+            border: 2px solid #33ff33;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+            width: 60px;
+        }
+        
+        .visualization {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            min-height: 200px;
+            border: 2px dashed #33ff33;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .element {
+            width: 60px;
+            height: 60px;
+            background-color: #222;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 5px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .array-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .stack-container {
+            display: flex;
+            flex-direction: column-reverse;
+        }
+        
+        .queue-container {
+            display: flex;
+            position: relative;
+        }
+        
+        .selected {
+            background-color: #33ff33;
+            color: #222;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #33ff33;
+        }
+        
+        .index {
+            position: absolute;
+            bottom: -20px;
+            font-size: 12px;
+            color: #aaffaa;
+        }
+        
+        .pointer {
+            position: absolute;
+            color: #ff6633;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .stack .pointer {
+            left: -35px;
+        }
+        
+        .explanation {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #222;
+            border: 2px solid #33ff33;
+            border-radius: 4px;
+            text-align: left;
+            line-height: 1.5;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .tab-buttons {
+            margin-bottom: 20px;
+        }
+        
+        .tab-button {
+            background-color: #222;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            outline: none;
+        }
+        
+        .tab-button.active {
+            background-color: #33ff33;
+            color: #222;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .crt-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        
+        .scanline {
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(
+                to bottom,
+                rgba(51, 255, 51, 0) 50%,
+                rgba(51, 255, 51, 0.02) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        .message-box {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #222;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            padding: 15px;
+            width: 80%;
+            max-width: 600px;
+            text-align: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: bold;
+        }
+        
+        .active-message {
+            opacity: 1;
+        }
+        
+        .arrow {
+            position: absolute;
+            color: #ff6633;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .front-arrow {
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .rear-arrow {
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        /* Score display in retro style */
+        .score-display {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #222;
+            border: 2px solid #33ff33;
+            color: #33ff33;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-align: right;
+        }
+        
+        /* Pixelated effect on images */
+        img {
+            image-rendering: pixelated;
+        }
+    </style>
+</head>
+<body>
+    <div class="crt-effect">
+        <div class="scanline"></div>
+    </div>
+    
+    <div class="score-display">
+        SCORE: <span id="score">0</span>
+    </div>
+    
+    <div class="container">
+        <h1>Data Structure Simulator</h1>
+        
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="openTab(event, 'array')">ARRAY</button>
+            <button class="tab-button" onclick="openTab(event, 'stack')">STACK</button>
+            <button class="tab-button" onclick="openTab(event, 'queue')">QUEUE</button>
+        </div>
+        
+        <!-- ARRAY TAB -->
+        <div id="array" class="tab-content active">
+            <h2>ARRAY</h2>
+            <p>An array stores elements in contiguous memory locations, allowing for direct access by index.</p>
+            
+            <div class="controls">
+                <button onclick="initializeArray()">Initialize Array</button>
+                <input type="number" id="arraySize" min="1" max="10" value="5" placeholder="Size">
+                <button onclick="getArrayElement()">Get Element</button>
+                <input type="number" id="arrayIndex" min="0" value="0" placeholder="Index">
+                <button onclick="setArrayElement()">Set Element</button>
+                <input type="number" id="arrayValue" value="42" placeholder="Value">
+            </div>
+            
+            <div class="visualization">
+                <div id="arrayContainer" class="array-container">
+                    <!-- Array elements will be added here -->
+                </div>
+            </div>
+            
+            <div class="explanation">
+                <h3>Array Operations:</h3>
+                <p><strong>Initialize:</strong> Creates a new array with the specified size. All elements start with value 0.</p>
+                <p><strong>Get Element [O(1)]:</strong> Retrieves the value at the specified index. Direct access!</p>
+                <p><strong>Set Element [O(1)]:</strong> Changes the value at the specified index. Also direct access!</p>
+                <p>Arrays are great for random access, but their size is fixed after initialization.</p>
+            </div>
+        </div>
+        
+        <!-- STACK TAB -->
+        <div id="stack" class="tab-content">
+            <h2>STACK</h2>
+            <p>A stack follows the Last-In-First-Out (LIFO) principle. Think of a stack of plates!</p>
+            
+            <div class="controls">
+                <button onclick="initializeStack()">Initialize Stack</button>
+                <button onclick="pushStack()">Push</button>
+                <input type="number" id="stackValue" value="42" placeholder="Value">
+                <button onclick="popStack()">Pop</button>
+                <button onclick="peekStack()">Peek</button>
+            </div>
+            
+            <div class="visualization">
+                <div id="stackContainer" class="stack-container">
+                    <!-- Stack elements will be added here -->
+                </div>
+            </div>
+            
+            <div class="explanation">
+                <h3>Stack Operations:</h3>
+                <p><strong>Push [O(1)]:</strong> Adds a new element to the top of the stack.</p>
+                <p><strong>Pop [O(1)]:</strong> Removes and returns the element from the top of the stack.</p>
+                <p><strong>Peek [O(1)]:</strong> Returns the top element without removing it.</p>
+                <p>Stacks are useful for tracking function calls, undo operations, and syntax checking!</p>
+            </div>
+        </div>
+        
+        <!-- QUEUE TAB -->
+        <div id="queue" class="tab-content">
+            <h2>QUEUE</h2>
+            <p>A queue follows the First-In-First-Out (FIFO) principle. Like people waiting in line!</p>
+            
+            <div class="controls">
+                <button onclick="initializeQueue()">Initialize Queue</button>
+                <button onclick="enqueueElement()">Enqueue</button>
+                <input type="number" id="queueValue" value="42" placeholder="Value">
+                <button onclick="dequeueElement()">Dequeue</button>
+                <button onclick="peekQueue()">Peek</button>
+            </div>
+            
+            <div class="visualization">
+                <div id="queueContainer" class="queue-container">
+                    <!-- Queue elements will be added here -->
+                </div>
+            </div>
+            
+            <div class="explanation">
+                <h3>Queue Operations:</h3>
+                <p><strong>Enqueue [O(1)]:</strong> Adds a new element to the rear of the queue.</p>
+                <p><strong>Dequeue [O(1)]:</strong> Removes and returns the element from the front of the queue.</p>
+                <p><strong>Peek [O(1)]:</strong> Returns the front element without removing it.</p>
+                <p>Queues are perfect for task scheduling, printing jobs, and breadth-first searches!</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="message-box" id="messageBox">
+        Message goes here
+    </div>
+    
+    <script>
+        // Global variables
+        let arrayData = [];
+        let stackData = [];
+        let queueData = [];
+        let score = 0;
+        
+        // Initialize the simulator
+        window.onload = function() {
+            initializeArray();
+            updateScore(0);
+        };
+        
+        // Tab switching functionality
+        function openTab(evt, tabName) {
+            let tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+            
+            let tabButtons = document.getElementsByClassName("tab-button");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("active");
+            }
+            
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+            
+            // Initialize the selected data structure if it's empty
+            if (tabName === "array" && arrayData.length === 0) {
+                initializeArray();
+            } else if (tabName === "stack" && stackData.length === 0) {
+                initializeStack();
+            } else if (tabName === "queue" && queueData.length === 0) {
+                initializeQueue();
+            }
+        }
+        
+        // Show message
+        function showMessage(message) {
+            const messageBox = document.getElementById("messageBox");
+            messageBox.textContent = message;
+            messageBox.classList.add("active-message");
+            
+            setTimeout(() => {
+                messageBox.classList.remove("active-message");
+            }, 3000);
+        }
+        
+        // Update score
+        function updateScore(points) {
+            score += points;
+            document.getElementById("score").textContent = score;
+            
+            if (points > 0) {
+                const scoreDisplay = document.getElementById("score");
+                scoreDisplay.style.color = "#ffff00";
+                setTimeout(() => {
+                    scoreDisplay.style.color = "#33ff33";
+                }, 300);
+            }
+        }
+        
+        // ========== ARRAY FUNCTIONS ==========
+        function initializeArray() {
+            const size = parseInt(document.getElementById("arraySize").value) || 5;
+            if (size < 1 || size > 10) {
+                showMessage("ARRAY SIZE MUST BE BETWEEN 1 AND 10");
+                return;
+            }
+            
+            arrayData = new Array(size).fill(0);
+            renderArray();
+            showMessage("NEW ARRAY INITIALIZED WITH SIZE " + size);
+            updateScore(10);
+        }
+        
+        function getArrayElement() {
+            const index = parseInt(document.getElementById("arrayIndex").value);
+            if (isValidArrayIndex(index)) {
+                const arrayContainer = document.getElementById("arrayContainer");
+                const elements = arrayContainer.getElementsByClassName("element");
+                
+                // Reset all elements
+                for (let i = 0; i < elements.length; i++) {
+                    elements[i].classList.remove("selected");
+                }
+                
+                // Highlight the selected element
+                elements[index].classList.add("selected");
+                
+                showMessage("ELEMENT AT INDEX " + index + " IS " + arrayData[index]);
+                updateScore(5);
+            }
+        }
+        
+        function setArrayElement() {
+            const index = parseInt(document.getElementById("arrayIndex").value);
+            const value = parseInt(document.getElementById("arrayValue").value);
+            
+            if (isValidArrayIndex(index)) {
+                arrayData[index] = value;
+                renderArray();
+                
+                setTimeout(() => {
+                    const arrayContainer = document.getElementById("arrayContainer");
+                    const elements = arrayContainer.getElementsByClassName("element");
+                    elements[index].classList.add("selected");
+                    
+                    setTimeout(() => {
+                        elements[index].classList.remove("selected");
+                    }, 1000);
+                }, 50);
+                
+                showMessage("ELEMENT AT INDEX " + index + " SET TO " + value);
+                updateScore(5);
+            }
+        }
+        
+        function isValidArrayIndex(index) {
+            if (index < 0 || index >= arrayData.length || isNaN(index)) {
+                showMessage("INVALID INDEX! MUST BE BETWEEN 0 AND " + (arrayData.length - 1));
+                return false;
+            }
+            return true;
+        }
+        
+        function renderArray() {
+            const arrayContainer = document.getElementById("arrayContainer");
+            arrayContainer.innerHTML = '';
+            
+            for (let i = 0; i < arrayData.length; i++) {
+                const element = document.createElement("div");
+                element.classList.add("element");
+                element.textContent = arrayData[i];
+                
+                const indexLabel = document.createElement("div");
+                indexLabel.classList.add("index");
+                indexLabel.textContent = i;
+                element.appendChild(indexLabel);
+                
+                arrayContainer.appendChild(element);
+            }
+        }
+        
+        // ========== STACK FUNCTIONS ==========
+        function initializeStack() {
+            stackData = [];
+            renderStack();
+            showMessage("NEW STACK INITIALIZED");
+            updateScore(10);
+        }
+        
+        function pushStack() {
+            const value = parseInt(document.getElementById("stackValue").value);
+            if (isNaN(value)) {
+                showMessage("PLEASE ENTER A VALID NUMBER");
+                return;
+            }
+            
+            if (stackData.length >= 10) {
+                showMessage("STACK OVERFLOW! CANNOT PUSH MORE ELEMENTS");
+                return;
+            }
+            
+            stackData.push(value);
+            renderStack();
+            
+            setTimeout(() => {
+                const stackContainer = document.getElementById("stackContainer");
+                const elements = stackContainer.getElementsByClassName("element");
+                elements[0].classList.add("selected");
+                
+                setTimeout(() => {
+                    elements[0].classList.remove("selected");
+                }, 1000);
+            }, 50);
+            
+            showMessage("PUSHED " + value + " TO THE STACK");
+            updateScore(5);
+        }
+        
+        function popStack() {
+            if (stackData.length === 0) {
+                showMessage("STACK UNDERFLOW! CANNOT POP FROM EMPTY STACK");
+                return;
+            }
+            
+            const value = stackData.pop();
+            renderStack();
+            showMessage("POPPED " + value + " FROM THE STACK");
+            updateScore(5);
+        }
+        
+        function peekStack() {
+            if (stackData.length === 0) {
+                showMessage("CANNOT PEEK! STACK IS EMPTY");
+                return;
+            }
+            
+            const topElement = stackData[stackData.length - 1];
+            
+            setTimeout(() => {
+                const stackContainer = document.getElementById("stackContainer");
+                const elements = stackContainer.getElementsByClassName("element");
+                elements[0].classList.add("selected");
+                
+                setTimeout(() => {
+                    elements[0].classList.remove("selected");
+                }, 1000);
+            }, 50);
+            
+            showMessage("TOP ELEMENT IS " + topElement);
+            updateScore(2);
+        }
+        
+        function renderStack() {
+            const stackContainer = document.getElementById("stackContainer");
+            stackContainer.innerHTML = '';
+            
+            // Copy and reverse the array for display (showing top of stack at the top)
+            const displayStack = [...stackData].reverse();
+            
+            for (let i = 0; i < displayStack.length; i++) {
+                const element = document.createElement("div");
+                element.classList.add("element");
+                element.textContent = displayStack[i];
+                
+                stackContainer.appendChild(element);
+                
+                // Add TOP pointer to the top element
+                if (i === 0) {
+                    const pointer = document.createElement("div");
+                    pointer.classList.add("pointer");
+                    pointer.textContent = "TOP";
+                    element.appendChild(pointer);
+                }
+            }
+        }
+        
+        // ========== QUEUE FUNCTIONS ==========
+        function initializeQueue() {
+            queueData = [];
+            renderQueue();
+            showMessage("NEW QUEUE INITIALIZED");
+            updateScore(10);
+        }
+        
+        function enqueueElement() {
+            const value = parseInt(document.getElementById("queueValue").value);
+            if (isNaN(value)) {
+                showMessage("PLEASE ENTER A VALID NUMBER");
+                return;
+            }
+            
+            if (queueData.length >= 10) {
+                showMessage("QUEUE IS FULL! CANNOT ENQUEUE MORE ELEMENTS");
+                return;
+            }
+            
+            queueData.push(value);
+            renderQueue();
+            
+            setTimeout(() => {
+                const queueContainer = document.getElementById("queueContainer");
+                const elements = queueContainer.getElementsByClassName("element");
+                elements[elements.length - 1].classList.add("selected");
+                
+                setTimeout(() => {
+                    elements[elements.length - 1].classList.remove("selected");
+                }, 1000);
+            }, 50);
+            
+            showMessage("ENQUEUED " + value + " TO THE QUEUE");
+            updateScore(5);
+        }
+        
+        function dequeueElement() {
+            if (queueData.length === 0) {
+                showMessage("QUEUE IS EMPTY! CANNOT DEQUEUE");
+                return;
+            }
+            
+            const value = queueData.shift();
+            renderQueue();
+            showMessage("DEQUEUED " + value + " FROM THE QUEUE");
+            updateScore(5);
+        }
+        
+        function peekQueue() {
+            if (queueData.length === 0) {
+                showMessage("CANNOT PEEK! QUEUE IS EMPTY");
+                return;
+            }
+            
+            const frontElement = queueData[0];
+            
+            setTimeout(() => {
+                const queueContainer = document.getElementById("queueContainer");
+                const elements = queueContainer.getElementsByClassName("element");
+                elements[0].classList.add("selected");
+                
+                setTimeout(() => {
+                    elements[0].classList.remove("selected");
+                }, 1000);
+            }, 50);
+            
+            showMessage("FRONT ELEMENT IS " + frontElement);
+            updateScore(2);
+        }
+        
+        function renderQueue() {
+            const queueContainer = document.getElementById("queueContainer");
+            queueContainer.innerHTML = '';
+            
+            for (let i = 0; i < queueData.length; i++) {
+                const element = document.createElement("div");
+                element.classList.add("element");
+                element.textContent = queueData[i];
+                
+                queueContainer.appendChild(element);
+                
+                // Add FRONT pointer to the first element
+                if (i === 0 && queueData.length > 0) {
+                    const frontArrow = document.createElement("div");
+                    frontArrow.classList.add("arrow", "front-arrow");
+                    frontArrow.textContent = "↑";
+                    element.appendChild(frontArrow);
+                    
+                    const frontLabel = document.createElement("div");
+                    frontLabel.style.position = "absolute";
+                    frontLabel.style.left = "-30px";
+                    frontLabel.style.top = "20px";
+                    frontLabel.style.color = "#ff6633";
+                    frontLabel.textContent = "FRONT";
+                    element.appendChild(frontLabel);
+                }
+                
+                // Add REAR pointer to the last element
+                if (i === queueData.length - 1 && queueData.length > 0) {
+                    const rearArrow = document.createElement("div");
+                    rearArrow.classList.add("arrow", "rear-arrow");
+                    rearArrow.textContent = "↑";
+                    element.appendChild(rearArrow);
+                    
+                    const rearLabel = document.createElement("div");
+                    rearLabel.style.position = "absolute";
+                    rearLabel.style.right = "-30px";
+                    rearLabel.style.top = "20px";
+                    rearLabel.style.color = "#ff6633";
+                    rearLabel.textContent = "REAR";
+                    element.appendChild(rearLabel);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

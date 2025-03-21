@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOIDLABS.inc</title>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({
+            antialias: true
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        document.body.appendChild(renderer.domElement);
+
+        // Fullscreen toggle
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'F11') {
+                event.preventDefault();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                } else {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        // Window resize handler
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        window.addEventListener('resize', onWindowResize);
+
+        // Lighting setup
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        scene.add(ambientLight);
+
+        // Lift dimensions - used for boundary checking
+        const liftWidth = 2;
+        const liftHeight = 2.5;
+        const liftDepth = 2;
+
+        // Lift boundary values for collision detection
+        const liftBounds = {
+            minX: -liftWidth / 2 + 0.2, // Add some padding from walls
+            maxX: liftWidth / 2 - 0.2,
+            minY: -liftHeight / 2 + 0.5, // Keep camera at a good height
+            maxY: liftHeight / 2 - 0.3,
+            minZ: -liftDepth / 2 + 0.2,
+            maxZ: liftDepth / 2 - 0.2
+        };
+
+        // Create lift components
+        function createLift() {
+            const liftGroup = new THREE.Group();
+
+            // Floor
+            const floorGeometry = new THREE.BoxGeometry(liftWidth, 0.1, liftDepth);
+            const floorMaterial = new THREE.MeshStandardMaterial({
+                color: 0x333333,
+                roughness: 0.5,
+                metalness: 0.2
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.position.set(0, -liftHeight / 2, 0);
+            floor.castShadow = true;
+            floor.receiveShadow = true;
+            liftGroup.add(floor);
+
+            // Ceiling
+            const ceilingGeometry = new THREE.BoxGeometry(liftWidth, 0.1, liftDepth);
+            const ceilingMaterial = new THREE.MeshStandardMaterial({
+                color: 0xeaeaea,
+                roughness: 0.5,
+                metalness: 0.2
+            });
+            const ceiling = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+            ceiling.position.set(0, liftHeight / 2, 0);
+            ceiling.castShadow = true;
+            ceiling.receiveShadow = true;
+            liftGroup.add(ceiling);
+
+            // Walls
+            const wallMaterial = new THREE.MeshStandardMaterial({
+                color: 0x999999,
+                roughness: 0.8,
+                metalness: 0.3
+            });
+
+            // Back wall
+            const backWallGeometry = new THREE.BoxGeometry(liftWidth, liftHeight, 0.1);
+            const backWall = new THREE.Mesh(backWallGeometry, wallMaterial);
+            backWall.position.set(0, 0, -liftDepth / 2);
+            backWall.castShadow = true;
+            backWall.receiveShadow = true;
+            liftGroup.add(backWall);
+
+            // Left wall
+            const leftWallGeometry = new THREE.BoxGeometry(0.1, liftHeight, liftDepth);
+            const leftWall = new THREE.Mesh(leftWallGeometry, wallMaterial);
+            leftWall.position.set(-liftWidth / 2, 0, 0);
+            leftWall.castShadow = true;
+            leftWall.receiveShadow = true;
+            liftGroup.add(leftWall);
+
+            // Right wall
+            const rightWallGeometry = new THREE.BoxGeometry(0.1, liftHeight, liftDepth);
+            const rightWall = new THREE.Mesh(rightWallGeometry, wallMaterial);
+            rightWall.position.set(liftWidth / 2, 0, 0);
+            rightWall.castShadow = true;
+            rightWall.receiveShadow = true;
+            liftGroup.add(rightWall);
+
+            // Control panel on right wall
+            const panelGeometry = new THREE.BoxGeometry(0.05, 0.8, 0.4);
+            const panelMaterial = new THREE.MeshStandardMaterial({
+                color: 0x444444,
+                roughness: 0.3,
+                metalness: 0.8
+            });
+            const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+            panel.position.set(liftWidth / 2 - 0.06, 0, 0);
+            panel.castShadow = true;
+            panel.receiveShadow = true;
+            liftGroup.add(panel);
+
+            // Ceiling light
+            const lightGeometry = new THREE.BoxGeometry(1, 0.05, 1);
+            const lightMaterial = new THREE.MeshStandardMaterial({
+                color: 0xffffff,
+                emissive: 0xffffff,
+                emissiveIntensity: 0.5,
+                roughness: 0.5,
+                metalness: 0.2
+            });
+            const lightFixture = new THREE.Mesh(lightGeometry, lightMaterial);
+            lightFixture.position.set(0, liftHeight / 2 - 0.05, 0);
+            liftGroup.add(lightFixture);
+
+            // Function to create a button
+            function createButton(x, y, z, color, emissive, level) {
+                const buttonGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.02, 32);
+                const buttonMaterial = new THREE.MeshStandardMaterial({
+                    color: color,
+                    emissive: emissive,
+                    emissiveIntensity: 0.5,
+                    roughness: 0.3,
+                    metalness: 0.6
+                });
+                const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
+                button.position.set(x, y, z);
+                button.rotation.z = Math.PI / 2;
+                button.userData = {
+                    isButton: true,
+                    level: level
+                };
+                return button;
+            }
+
+            // Add buttons - Manually positioned with level names
+            const buttonData = [{
+                    x: 0.9,
+                    y: 0.3,
+                    z: 0.10,
+                    color: 0xF44336,
+                    emissive: 0xB71C1C,
+                    level: "hall"
+                },
+                {
+                    x: 0.9,
+                    y: 0.3,
+                    z: -0.10,
+                    color: 0xE91E63,
+                    emissive: 0x880E4F,
+                    level: "level8"
+                },
+                {
+                    x: 0.9,
+                    y: 0.1,
+                    z: -0.10,
+                    color: 0x9C27B0,
+                    emissive: 0x4A148C,
+                    level: "level9"
+                },
+                {
+                    x: 0.9,
+                    y: 0.1,
+                    z: 0.10,
+                    color: 0x3F51B5,
+                    emissive: 0x1A237E,
+                    level: "level10"
+                },
+                {
+                    x: 0.9,
+                    y: -0.1,
+                    z: 0.10,
+                    color: 0x2196F3,
+                    emissive: 0x0D47A1,
+                    level: "hallway11"
+                },
+                {
+                    x: 0.9,
+                    y: -0.1,
+                    z: -0.10,
+                    color: 0x4CAF50,
+                    emissive: 0x2e7d32,
+                    level: "hallway"
+                }
+            ];
+
+            const buttons = buttonData.map(data => createButton(data.x, data.y, data.z, data.color, data.emissive, data.level));
+            const buttonMeshes = buttons.map(button => liftGroup.add(button)); // Add buttons to the scene
+
+            // Front door frame (no actual door, just a frame)
+            const doorFrameGeometry = new THREE.BoxGeometry(1.5, 2.2, 0.1);
+            const doorFrameMaterial = new THREE.MeshStandardMaterial({
+                color: 0x555555,
+                roughness: 0.5,
+                metalness: 0.4
+            });
+            const doorFrame = new THREE.Mesh(doorFrameGeometry, doorFrameMaterial);
+            doorFrame.position.set(0, -0.15, liftDepth / 2);
+            liftGroup.add(doorFrame);
+
+            return {
+                liftGroup,
+                buttons
+            };
+        }
+        // Create and add lift to scene
+        const {
+            liftGroup,
+            buttons
+        } = createLift();
+        scene.add(liftGroup);
+
+        // Add lights
+        const ceilingLight = new THREE.PointLight(0xffffff, 1.5, 1);
+        ceilingLight.position.set(0, 2, 0);
+        ceilingLight.castShadow = true;
+        ceilingLight.shadow.mapSize.width = 1024;
+        ceilingLight.shadow.mapSize.height = 1024;
+        liftGroup.add(ceilingLight);
+
+        // Add corner lights for better visibility
+        const cornerPositions = [
+            [0.8, 1, 0.8],
+            [0.8, 1, -0.8],
+            [-0.8, 1, 0.8],
+            [-0.8, 1, -0.8]
+        ];
+
+        cornerPositions.forEach(pos => {
+            const cornerLight = new THREE.PointLight(0xffe3c2, 0.7, 5);
+            cornerLight.position.set(...pos);
+            liftGroup.add(cornerLight);
+        });
+
+        // Button lights
+        const buttonLights = buttons.map(button => {
+            const light = new THREE.PointLight(button.material.color, 0.8, 1);
+            light.position.set(button.position.x + 0.05, button.position.y, button.position.z);
+            liftGroup.add(light);
+            return light;
+        });
+
+        // Raycaster for button interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        window.addEventListener('click', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersects = raycaster.intersectObjects(scene.children, true);
+
+            for (let i = 0; i < intersects.length; i++) {
+                if (intersects[i].object.userData.isButton) {
+                    const button = intersects[i].object;
+                    const level = button.userData.level; // Get the level from userData
+                    const buttonIndex = buttons.indexOf(button);
+                    const buttonLight = buttonLights[buttonIndex];
+
+                    // Animate button press
+                    const originalZ = intersects[i].object.position.z;
+                    intersects[i].object.position.z -= 0.02;
+
+                    // Flash button light
+                    buttonLight.intensity = 2;
+
+                    // Navigate to next page after a short delay
+                    setTimeout(() => {
+                        window.location.href = `${level}.html`; // Navigate to the level's page
+                    }, 500);
+
+                    // Reset button position and light
+                    setTimeout(() => {
+                        intersects[i].object.position.z = originalZ;
+                        buttonLight.intensity = 0.8;
+                    }, 200);
+
+                    break;
+                }
+            }
+        });
+
+        // Place camera inside the lift
+        camera.position.set(0, 0, 0);
+        camera.lookAt(0, 0, 1); // Looking toward the door
+
+        // Movement Controls
+        const speed = 0.05;
+        const keys = {
+            w: false,
+            a: false,
+            s: false,
+            d: false
+        };
+        let isMouseDown = false;
+        let previousMouseX = 0;
+        const rotationSpeed = 0.005;
+
+        window.addEventListener('keydown', (event) => {
+            keys[event.key.toLowerCase()] = true;
+        });
+
+        window.addEventListener('keyup', (event) => {
+            keys[event.key.toLowerCase()] = false;
+        });
+
+        window.addEventListener('mousedown', (event) => {
+            isMouseDown = true;
+            previousMouseX = event.clientX;
+        });
+
+        window.addEventListener('mouseup', () => {
+            isMouseDown = false;
+        });
+
+        window.addEventListener('mousemove', (event) => {
+            if (isMouseDown) {
+                camera.rotation.y -= (event.clientX - previousMouseX) * rotationSpeed;
+                previousMouseX = event.clientX;
+            }
+        });
+
+        // Check if position is within lift boundaries
+        function isWithinLiftBoundaries(position) {
+            return (
+                position.x >= liftBounds.minX && position.x <= liftBounds.maxX &&
+                position.y >= liftBounds.minY && position.y <= liftBounds.maxY &&
+                position.z >= liftBounds.minZ && position.z <= liftBounds.maxZ
+            );
+        }
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Movement
+            const direction = new THREE.Vector3();
+            camera.getWorldDirection(direction);
+            const right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0)).normalize();
+
+            // Calculate potential new position
+            const potentialPosition = camera.position.clone();
+
+            if (keys.w) potentialPosition.addScaledVector(direction, speed);
+            if (keys.s) potentialPosition.addScaledVector(direction, -speed);
+            if (keys.a) potentialPosition.addScaledVector(right, -speed);
+            if (keys.d) potentialPosition.addScaledVector(right, speed);
+
+            if (isWithinLiftBoundaries(potentialPosition)) {
+                camera.position.copy(potentialPosition);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
