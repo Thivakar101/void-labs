@@ -9,8 +9,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <link rel="stylesheet" href="/static/css/void.css">
-  <script src="/static/script/void.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@google/model-viewer@latest/dist/model-viewer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  
+  <link rel="stylesheet" href="static/css/void.css">
+  <script src="static/script/void.js" defer></script>
+  <style>
+    model-viewer {
+      width: 500px;
+      height: 500px;
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -31,6 +44,7 @@
       <h1 class="hero-title glitch" data-text="Exploring The Digital Void">Exploring The Digital Void</h1>
       <p class="hero-subtitle">Pioneering innovative solutions for the future of technology. Join us on a journey beyond the limits of what's possible.</p>
       <a href="hall.html" class="cta-button">Get Started</a>
+      <model-viewer src="static/models/stanging_astronaut_fl_0321045322_texture.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
     </div>
   </section>
   
