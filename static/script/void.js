@@ -1,5 +1,4 @@
 
-    // Three.js setup for hero section
     const heroContainer = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -9,7 +8,6 @@
     renderer.setPixelRatio(window.devicePixelRatio);
     heroContainer.appendChild(renderer.domElement);
     
-    // Create stars
     const starsGeometry = new THREE.BufferGeometry();
     const starsMaterial = new THREE.PointsMaterial({
       color: 0xffffff,
@@ -29,7 +27,6 @@
     const stars = new THREE.Points(starsGeometry, starsMaterial);
     scene.add(stars);
     
-    // Create a wireframe sphere
     const sphereGeometry = new THREE.SphereGeometry(1.5, 32, 32);
     const wireframe = new THREE.WireframeGeometry(sphereGeometry);
     const line = new THREE.LineSegments(wireframe);
@@ -38,7 +35,6 @@
     line.material.opacity = 0.6;
     scene.add(line);
     
-    // Create a icosahedron (for a spaceship-like object)
     const icoGeometry = new THREE.IcosahedronGeometry(0.2, 0);
     const icoMaterial = new THREE.MeshBasicMaterial({ 
       color: 0x8a2be2,
@@ -48,10 +44,10 @@
     ico.position.set(1, 0.5, 0);
     scene.add(ico);
     
-    // Position camera
+  
     camera.position.z = 5;
     
-    // Animation function
+    
     function animate() {
       requestAnimationFrame(animate);
       
@@ -69,14 +65,14 @@
     }
     animate();
     
-    // Handle window resize
+    
     window.addEventListener('resize', () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
     
-    // Setup 3D models for other sections
+    
     function setupSectionModel(containerId, geometry, color, position) {
       const container = document.getElementById(containerId);
       
@@ -87,7 +83,6 @@
       renderer.setSize(container.clientWidth, container.clientHeight);
       container.appendChild(renderer.domElement);
       
-      // Add object
       const material = new THREE.MeshBasicMaterial({ 
         color: color,
         wireframe: true
@@ -95,10 +90,8 @@
       const object = new THREE.Mesh(geometry, material);
       scene.add(object);
       
-      // Position
       camera.position.z = position;
       
-      // Animation
       function animate() {
         requestAnimationFrame(animate);
         object.rotation.x += 0.01;
@@ -108,7 +101,6 @@
       animate();
     }
     
-    // Setup section models
     setupSectionModel('mission-model', new THREE.TorusGeometry(1, 0.3, 16, 100), 0x8a2be2, 4);
     setupSectionModel('vision-model', new THREE.OctahedronGeometry(1, 0), 0x8a2be2, 4);
     setupSectionModel('vr-model', new THREE.TorusKnotGeometry(0.8, 0.3, 100, 16), 0x8a2be2, 4);
