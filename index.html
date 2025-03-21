@@ -15,13 +15,155 @@
   <link rel="stylesheet" href="static/css/void.css">
   <script src="static/script/void.js" defer></script>
   <style>
-    model-viewer {
-      width: 500px;
-      height: 500px;
-      position: absolute;
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
+    body {
+      margin: 0;
+      font-family: 'Press Start 2P', cursive;
+      background-color: #121212;
+      color: #ffffff;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      background-color: #1e1e1e;
+    }
+    .logo {
+      font-size: 24px;
+      color: #8a2be2;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    nav ul li {
+      display: inline;
+    }
+    nav ul li a {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .hero {
+      position: relative;
+      height: 100vh;
+      background: url('static/images/hero-bg.jpg') no-repeat center center/cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .hero-content {
+      max-width: 600px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+    }
+    .hero-title {
+      font-size: 36px;
+      margin-bottom: 20px;
+    }
+    .hero-subtitle {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    .cta-button {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #8a2be2;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    .cta-button:hover {
+      background-color: #6a0dad;
+    }
+    .section {
+      padding: 60px 20px;
+      text-align: center;
+    }
+    .section-title {
+      font-size: 28px;
+      margin-bottom: 40px;
+      color: #8a2be2;
+    }
+    .services {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .service-card {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      text-align: left;
+    }
+    .service-card h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    .service-card p {
+      font-size: 14px;
+    }
+    .model-container {
+      margin-top: 20px;
+    }
+    #contact {
+      background: url('static/images/contact-bg.jpg') no-repeat center center/cover;
+      color: #ffffff;
+    }
+    .contact-card {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 40px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .contact-card h3 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .contact-card p {
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .contact-card .cta-button {
+      margin-top: 20px;
+      display: block;
+      text-align: center;
+    }
+    footer {
+      background-color: #1e1e1e;
+      padding: 20px;
+      text-align: center;
+    }
+    .footer-logo {
+      font-size: 24px;
+      color: #8a2be2;
+    }
+    .footer-links {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+    .footer-links li {
+      display: inline;
+    }
+    .footer-links li a {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .copyright {
+      font-size: 12px;
+      color: #888;
     }
   </style>
 </head>
@@ -43,7 +185,7 @@
     <div class="hero-content">
       <h1 class="hero-title glitch" data-text="Exploring The Digital Void">Exploring The Digital Void</h1>
       <p class="hero-subtitle">Pioneering innovative solutions for the future of technology. Join us on a journey beyond the limits of what's possible.</p>
-      <a href="hall.html" class="cta-button">Get Started</a>
+      <a href="hall.html" class="cta-button">Enter the VOID</a>
       <model-viewer src="static/models/stanging_astronaut_fl_0321045322_texture.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
     </div>
   </section>
@@ -68,8 +210,8 @@
     <h2 class="section-title">Our Services</h2>
     <div class="services">
       <div class="service-card">
-        <h3>VR/AR Experiences</h3>
-        <p>Immerse your audience in captivating virtual and augmented reality experiences that transcend physical limitations and create lasting impressions.</p>
+        <h3>Virtual Experiences</h3>
+        <p>Immerse your audience in captivating virtual experiences that transcend physical limitations and create lasting impressions.</p>
         <div class="model-container" id="vr-model"></div>
       </div>
       <div class="service-card">
@@ -87,12 +229,10 @@
   
   <section id="contact" class="section">
     <h2 class="section-title">Contact Us</h2>
-    <div class="services">
-      <div class="service-card">
-        <h3>Get In Touch</h3>
-        <p>Ready to embark on a journey through the digital void? Contact our team today to discuss how we can help bring your vision to life.</p>
-        <a href="mailto:info@voidlabs.inc" class="cta-button" style="margin-top: 1.5rem; display: block;">Email Us</a>
-      </div>
+    <div class="contact-card">
+      <h3>Get In Touch</h3>
+      <p>Ready to embark on a journey through the digital void? Contact our team today to discuss how we can help bring your vision to life.</p>
+      <a href="mailto:info@voidlabs.inc" class="cta-button">Email Us</a>
     </div>
   </section>
   
