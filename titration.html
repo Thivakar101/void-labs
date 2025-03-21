@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titration Experiment Visualization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        
+        .experiment {
+            width: 400px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            width: 400px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .apparatus {
+            position: relative;
+            height: 400px;
+            margin: 0 auto;
+        }
+        
+        .buret {
+            position: absolute;
+            width: 40px;
+            height: 250px;
+            background-color: #ecf0f1;
+            border: 2px solid #7f8c8d;
+            border-bottom: none;
+            left: 180px;
+            top: 0;
+        }
+        
+        .buret-tip {
+            position: absolute;
+            width: 4px;
+            height: 40px;
+            background-color: #bdc3c7;
+            left: 198px;
+            top: 250px;
+        }
+        
+        .flask {
+            position: absolute;
+            width: 160px;
+            height: 80px;
+            background-color: transparent;
+            border: 2px solid #7f8c8d;
+            border-radius: 0 0 80px 80px;
+            left: 120px;
+            top: 300px;
+            overflow: hidden;
+        }
+        
+        .solution {
+            position: absolute;
+            width: 100%;
+            height: 60px;
+            bottom: 0;
+            background-color: #f1c40f;
+            transition: background-color 1s ease;
+        }
+        
+        .buret-solution {
+            position: absolute;
+            width: 100%;
+            bottom: 0;
+            background-color: #3498db;
+            transition: height 0.5s ease;
+        }
+        
+        .drop {
+            position: absolute;
+            width: 6px;
+            height: 10px;
+            background-color: #3498db;
+            border-radius: 50%;
+            left: 197px;
+            opacity: 0;
+        }
+        
+        .magnetic-stirrer {
+            position: absolute;
+            width: 40px;
+            height: 8px;
+            background-color: #34495e;
+            border-radius: 4px;
+            left: 180px;
+            top: 365px;
+            transform-origin: center;
+            animation: stir 1.5s linear infinite;
+        }
+        
+        @keyframes stir {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .controls-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        select, input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .ph-meter {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .ph-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .graph-container {
+            width: 100%;
+            margin-top: 30px;
+        }
+        
+        .data-point {
+            height: 8px;
+            width: 8px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .data-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        
+        .data-table th {
+            background-color: #f2f2f2;
+        }
+        
+        .status-message {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .reset-button {
+            background-color: #e74c3c;
+        }
+        
+        .reset-button:hover {
+            background-color: #c0392b;
+        }
+        
+        #graphCanvas {
+            border: 1px solid #ddd;
+            margin-top: 10px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chemistry Titration Experiment</h1>
+    
+    <div class="container">
+        <div class="experiment">
+            <div class="apparatus">
+                <div class="buret">
+                    <div class="buret-solution" id="buretSolution"></div>
+                </div>
+                <div class="buret-tip"></div>
+                <div class="drop" id="drop"></div>
+                <div class="flask">
+                    <div class="solution" id="flaskSolution"></div>
+                    <div class="magnetic-stirrer" id="stirrer"></div>
+                </div>
+            </div>
+            
+            <div class="ph-meter">
+                <label>pH Value:</label>
+                <div class="ph-value" id="phValue">7.00</div>
+            </div>
+            
+            <div class="graph-container">
+                <canvas id="graphCanvas" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="controls-group">
+                <label for="acidType">Flask Solution:</label>
+                <select id="acidType">
+                    <option value="weak">Weak Acid (CH₃COOH)</option>
+                    <option value="strong">Strong Acid (HCl)</option>
+                    <option value="strong-base">Strong Base (NaOH)</option>
+                </select>
+            </div>
+            
+            <div class="controls-group">
+                <label for="baseType">Buret Solution:</label>
+                <select id="baseType">
+                    <option value="strong">Strong Base (NaOH)</option>
+                    <option value="weak">Weak Base (NH₃)</option>
+                    <option value="strong-acid">Strong Acid (HCl)</option>
+                </select>
+            </div>
+            
+            <div class="controls-group">
+                <label for="concentration">Flask Solution Concentration (M):</label>
+                <input type="number" id="concentration" min="0.01" max="1" step="0.01" value="0.1">
+            </div>
+            
+            <div class="controls-group">
+                <label for="titrantConcentration">Buret Solution Concentration (M):</label>
+                <input type="number" id="titrantConcentration" min="0.01" max="1" step="0.01" value="0.1">
+            </div>
+            
+            <div class="controls-group">
+                <label for="dropRate">Drop Rate (mL/s):</label>
+                <input type="number" id="dropRate" min="0.1" max="5" step="0.1" value="0.5">
+            </div>
+            
+            <button id="startButton">Start Titration</button>
+            <button id="stopButton" disabled>Stop</button>
+            <button id="resetButton" class="reset-button">Reset</button>
+            
+            <div class="status-message" id="statusMessage"></div>
+            
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Volume Added (mL)</th>
+                        <th>pH</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Global variables
+        let titrationInterval;
+        let volumeAdded = 0;
+        let currentPH = 7.0;
+        let equivalencePoint = 0;
+        let isRunning = false;
+        let dataPoints = [];
+        
+        // DOM Elements
+        const buretSolution = document.getElementById('buretSolution');
+        const flaskSolution = document.getElementById('flaskSolution');
+        const drop = document.getElementById('drop');
+        const phValue = document.getElementById('phValue');
+        const startButton = document.getElementById('startButton');
+        const stopButton = document.getElementById('stopButton');
+        const resetButton = document.getElementById('resetButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const dataTable = document.getElementById('dataTable');
+        const stirrer = document.getElementById('stirrer');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const ctx = graphCanvas.getContext('2d');
+        
+        // Set initial buret solution level
+        buretSolution.style.height = '230px';
+        
+        // Event listeners
+        startButton.addEventListener('click', startTitration);
+        stopButton.addEventListener('click', stopTitration);
+        resetButton.addEventListener('click', resetExperiment);
+        
+        // Initialize the graph
+        function initGraph() {
+            ctx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+            
+            // Draw axes
+            ctx.beginPath();
+            ctx.moveTo(40, 20);
+            ctx.lineTo(40, 180);
+            ctx.lineTo(380, 180);
+            ctx.strokeStyle = '#2c3e50';
+            ctx.stroke();
+            
+            // Draw X-axis label
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '10px Arial';
+            ctx.fillText('Volume of Titrant Added (mL)', 150, 195);
+            
+            // Draw Y-axis label
+            ctx.save();
+            ctx.translate(15, 100);
+            ctx.rotate(-Math.PI/2);
+            ctx.fillText('pH', 0, 0);
+            ctx.restore();
+            
+            // Draw grid lines
+            ctx.beginPath();
+            ctx.strokeStyle = '#ddd';
+            
+            // Horizontal grid lines (pH)
+            for (let i = 0; i <= 14; i += 2) {
+                const y = 180 - (i * 10);
+                ctx.moveTo(38, y);
+                ctx.lineTo(380, y);
+                ctx.fillText(i.toString(), 25, y + 3);
+            }
+            
+            // Vertical grid lines (volume)
+            for (let i = 0; i <= 25; i += 5) {
+                const x = 40 + (i * 13.5);
+                ctx.moveTo(x, 182);
+                ctx.lineTo(x, 20);
+                ctx.fillText(i.toString(), x - 3, 190);
+            }
+            
+            ctx.stroke();
+        }
+        
+        // Plot point on graph
+        function plotPoint(volume, ph) {
+            const x = 40 + (volume * 13.5);
+            const y = 180 - (ph * 10);
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = '#e74c3c';
+            ctx.fill();
+            
+            // Connect points with lines if there are previous points
+            if (dataPoints.length > 0) {
+                const prevPoint = dataPoints[dataPoints.length - 1];
+                const prevX = 40 + (prevPoint.volume * 13.5);
+                const prevY = 180 - (prevPoint.ph * 10);
+                
+                ctx.beginPath();
+                ctx.moveTo(prevX, prevY);
+                ctx.lineTo(x, y);
+                ctx.strokeStyle = '#e74c3c';
+                ctx.stroke();
+            }
+            
+            dataPoints.push({volume, ph});
+        }
+        
+        // Add data to table
+        function addDataToTable(volume, ph) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${volume.toFixed(2)}</td>
+                <td>${ph.toFixed(2)}</td>
+            `;
+            dataTable.appendChild(row);
+        }
+        
+        // Calculate pH based on titration progress
+        function calculatePH(volume) {
+            const acidType = document.getElementById('acidType').value;
+            const baseType = document.getElementById('baseType').value;
+            const concentration = parseFloat(document.getElementById('concentration').value);
+            const titrantConcentration = parseFloat(document.getElementById('titrantConcentration').value);
+            
+            // Calculate initial moles of acid/base in flask
+            const initialMoles = concentration * 25 / 1000; // 25 mL volume in flask
+            
+            // Calculate moles of titrant added
+            const titrantMoles = titrantConcentration * volume / 1000;
+            
+            // Different combinations of acid-base titrations
+            let ph = 7.0;
+            
+            if (acidType === 'strong' && baseType === 'strong') {
+                // Strong acid - Strong base titration
+                equivalencePoint = (initialMoles / titrantConcentration) * 1000;
+                
+                if (volume < equivalencePoint) {
+                    // Before equivalence point: excess strong acid
+                    const excessAcidMoles = initialMoles - titrantMoles;
+                    const excessAcidConcentration = excessAcidMoles / ((25 + volume) / 1000);
+                    ph = -Math.log10(excessAcidConcentration);
+                } else if (Math.abs(volume - equivalencePoint) < 0.1) {
+                    // At equivalence point: neutral
+                    ph = 7.0;
+                } else {
+                    // After equivalence point: excess strong base
+                    const excessBaseMoles = titrantMoles - initialMoles;
+                    const excessBaseConcentration = excessBaseMoles / ((25 + volume) / 1000);
+                    ph = 14 + Math.log10(excessBaseConcentration);
+                }
+            } else if (acidType === 'weak' && baseType === 'strong') {
+                // Weak acid - Strong base titration
+                const Ka = 1.8e-5; // Acetic acid
+                equivalencePoint = (initialMoles / titrantConcentration) * 1000;
+                
+                if (volume < equivalencePoint) {
+                    // Before equivalence: buffer region
+                    const acidRemaining = initialMoles - titrantMoles;
+                    const saltFormed = titrantMoles;
+                    if (saltFormed > 0) {
+                        ph = -Math.log10(Ka) + Math.log10(saltFormed / acidRemaining);
+                    } else {
+                        // Initial pH of weak acid
+                        ph = -Math.log10(Math.sqrt(Ka * concentration));
+                    }
+                } else if (Math.abs(volume - equivalencePoint) < 0.1) {
+                    // At equivalence: hydrolysis of salt
+                    ph = 8.72; // Approximate for acetate salt
+                } else {
+                    // After equivalence: excess strong base
+                    const excessBaseMoles = titrantMoles - initialMoles;
+                    const excessBaseConcentration = excessBaseMoles / ((25 + volume) / 1000);
+                    ph = 14 + Math.log10(excessBaseConcentration);
+                }
+            } else if (acidType === 'strong-base' && baseType === 'strong-acid') {
+                // Strong base - Strong acid titration
+                equivalencePoint = (initialMoles / titrantConcentration) * 1000;
+                
+                if (volume < equivalencePoint) {
+                    // Before equivalence point: excess strong base
+                    const excessBaseMoles = initialMoles - titrantMoles;
+                    const excessBaseConcentration = excessBaseMoles / ((25 + volume) / 1000);
+                    ph = 14 + Math.log10(excessBaseConcentration);
+                } else if (Math.abs(volume - equivalencePoint) < 0.1) {
+                    // At equivalence point: neutral
+                    ph = 7.0;
+                } else {
+                    // After equivalence point: excess strong acid
+                    const excessAcidMoles = titrantMoles - initialMoles;
+                    const excessAcidConcentration = excessAcidMoles / ((25 + volume) / 1000);
+                    ph = -Math.log10(excessAcidConcentration);
+                }
+            }
+            
+            // Limit pH range
+            ph = Math.max(0, Math.min(14, ph));
+            return ph;
+        }
+        
+        // Animate drop falling
+        function animateDrop() {
+            drop.style.opacity = '1';
+            drop.style.top = '290px';
+            
+            setTimeout(() => {
+                drop.style.opacity = '0';
+                drop.style.top = '250px';
+            }, 500);
+        }
+        
+        // Update solution color based on pH
+        function updateSolutionColor(ph) {
+            // Color gradient based on pH
+            if (ph <= 3) {
+                flaskSolution.style.backgroundColor = '#ff5252'; // Red (acidic)
+            } else if (ph <= 5) {
+                flaskSolution.style.backgroundColor = '#ff9966'; // Orange-red
+            } else if (ph <= 6) {
+                flaskSolution.style.backgroundColor = '#ffcf75'; // Orange-yellow
+            } else if (ph < 8) {
+                flaskSolution.style.backgroundColor = '#b2ff59'; // Green (neutral)
+            } else if (ph < 10) {
+                flaskSolution.style.backgroundColor = '#64b5f6'; // Light blue
+            } else {
+                flaskSolution.style.backgroundColor = '#5c6bc0'; // Purple (basic)
+            }
+        }
+        
+        // Start titration process
+        function startTitration() {
+            if (isRunning) return;
+            
+            isRunning = true;
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            
+            // For first start, initialize graph
+            if (volumeAdded === 0) {
+                initGraph();
+                const initialPH = calculatePH(0);
+                currentPH = initialPH;
+                phValue.textContent = initialPH.toFixed(2);
+                updateSolutionColor(initialPH);
+                
+                // Add initial data point
+                plotPoint(0, initialPH);
+                addDataToTable(0, initialPH);
+                
+                // Clear status message
+                statusMessage.textContent = '';
+                statusMessage.style.backgroundColor = 'transparent';
+            }
+            
+            const dropRate = parseFloat(document.getElementById('dropRate').value);
+            const dropInterval = 1000 / dropRate;
+            
+            titrationInterval = setInterval(() => {
+                // Decrease buret solution level
+                const currentHeight = parseFloat(buretSolution.style.height);
+                if (currentHeight > 20) {
+                    buretSolution.style.height = (currentHeight - 0.5) + 'px';
+                }
+                
+                // Animate a drop
+                animateDrop();
+                
+                // Add volume
+                volumeAdded += dropRate * 0.1; // Each interval adds dropRate * 0.1 mL
+                
+                // Calculate new pH
+                currentPH = calculatePH(volumeAdded);
+                phValue.textContent = currentPH.toFixed(2);
+                
+                // Update solution color
+                updateSolutionColor(currentPH);
+                
+                // Plot on graph
+                if (volumeAdded % 0.5 < 0.1) { // Record data every ~0.5 mL
+                    plotPoint(volumeAdded, currentPH);
+                    addDataToTable(volumeAdded, currentPH);
+                }
+                
+                // Check if we're near equivalence point
+                if (Math.abs(volumeAdded - equivalencePoint) < 0.2 && equivalencePoint > 0) {
+                    statusMessage.textContent = "Near equivalence point!";
+                    statusMessage.style.backgroundColor = "#f39c12";
+                    statusMessage.style.color = "white";
+                }
+                
+                // Check if we should stop
+                if (volumeAdded >= 25 || currentHeight <= 20) {
+                    stopTitration();
+                    statusMessage.textContent = "Titration complete.";
+                    statusMessage.style.backgroundColor = "#2ecc71";
+                    statusMessage.style.color = "white";
+                }
+            }, dropInterval);
+        }
+        
+        // Stop titration
+        function stopTitration() {
+            clearInterval(titrationInterval);
+            isRunning = false;
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+        
+        // Reset experiment
+        function resetExperiment() {
+            stopTitration();
+            volumeAdded = 0;
+            currentPH = 7.0;
+            dataPoints = [];
+            equivalencePoint = 0;
+            
+            // Reset UI
+            buretSolution.style.height = '230px';
+            phValue.textContent = '7.00';
+            flaskSolution.style.backgroundColor = '#f1c40f';
+            
+            // Clear data table
+            dataTable.innerHTML = '';
+            
+            // Clear graph
+            initGraph();
+            
+            // Reset status
+            statusMessage.textContent = '';
+            statusMessage.style.backgroundColor = 'transparent';
+            
+            startButton.disabled = false;
+            stopButton.disabled = true;
+        }
+        
+        // Initialize the experiment
+        initGraph();
+    </script>
+</body>
+</html>

@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Module Structure Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        #container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        #info {
+            position: absolute;
+            top: 10px;
+            width: 100%;
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px;
+            z-index: 100;
+        }
+        #legend {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <div id="info">
+        <h1>Operating System Module Structure</h1>
+        <p>An interactive 3D visualization of OS components and their interactions</p>
+    </div>
+    
+    <div id="legend">
+        <h3>Legend</h3>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #ff5733;"></div>
+            <span>Kernel</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #33a8ff;"></div>
+            <span>Memory Management</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #33ff57;"></div>
+            <span>Process Management</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #d433ff;"></div>
+            <span>File System</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #ffdd33;"></div>
+            <span>Device Drivers</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box" style="background-color: #a6a6a6;"></div>
+            <span>User Applications</span>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h3>Instructions</h3>
+        <p>Drag to rotate</p>
+        <p>Scroll to zoom</p>
+        <p>Click on a component for details</p>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+    <script>
+        // Initialize Three.js scene
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x121212);
+        
+        // Camera setup
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 30;
+        
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('container').appendChild(renderer.domElement);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+        
+        // OS Component colors
+        const colors = {
+            kernel: 0xff5733,
+            memory: 0x33a8ff,
+            process: 0x33ff57,
+            filesystem: 0xd433ff,
+            device: 0xffdd33,
+            application: 0xa6a6a6
+        };
+        
+        // Create OS Components
+        // Kernel (core) at the center
+        const kernelGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const kernelMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.kernel,
+            shininess: 100,
+            transparent: true,
+            opacity: 0.9
+        });
+        const kernel = new THREE.Mesh(kernelGeometry, kernelMaterial);
+        kernel.userData = { 
+            type: 'Kernel',
+            description: 'The core of the OS that has complete control over system resources and provides basic services for all other parts of the OS.'
+        };
+        scene.add(kernel);
+        
+        // Memory Management
+        const memoryGeometry = new THREE.TorusGeometry(8, 1, 16, 100);
+        const memoryMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.memory,
+            shininess: 80
+        });
+        const memory = new THREE.Mesh(memoryGeometry, memoryMaterial);
+        memory.rotation.x = Math.PI / 2;
+        memory.userData = { 
+            type: 'Memory Management',
+            description: 'Manages the RAM allocation, virtual memory, and paging operations. Controls what processes can access which memory regions.'
+        };
+        scene.add(memory);
+        
+        // Process Management
+        const processGeometry = new THREE.OctahedronGeometry(2.5);
+        const processMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.process,
+            shininess: 80
+        });
+        
+        const processes = [];
+        for (let i = 0; i < 5; i++) {
+            const process = new THREE.Mesh(processGeometry, processMaterial);
+            const angle = (i / 5) * Math.PI * 2;
+            process.position.x = Math.cos(angle) * 12;
+            process.position.y = Math.sin(angle) * 12;
+            process.userData = { 
+                type: 'Process Management',
+                description: 'Handles process creation, scheduling, termination, and inter-process communication.'
+            };
+            scene.add(process);
+            processes.push(process);
+        }
+        
+        // File System
+        const fsGeometry = new THREE.BoxGeometry(3, 3, 3);
+        const fsMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.filesystem,
+            shininess: 80
+        });
+        
+        const fileSystem = new THREE.Mesh(fsGeometry, fsMaterial);
+        fileSystem.position.set(-15, 0, 0);
+        fileSystem.userData = { 
+            type: 'File System',
+            description: 'Manages files and directories, providing an interface for storing and retrieving data from storage devices.'
+        };
+        scene.add(fileSystem);
+        
+        // Device Drivers
+        const deviceGeometry = new THREE.ConeGeometry(1.5, 4, 32);
+        const deviceMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.device,
+            shininess: 80
+        });
+        
+        const devices = [];
+        for (let i = 0; i < 8; i++) {
+            const device = new THREE.Mesh(deviceGeometry, deviceMaterial);
+            const angle = (i / 8) * Math.PI * 2;
+            device.position.x = Math.cos(angle) * 18;
+            device.position.z = Math.sin(angle) * 18;
+            device.rotation.x = Math.PI / 2;
+            device.rotation.z = -angle;
+            device.userData = { 
+                type: 'Device Drivers',
+                description: 'Interface between hardware devices and the OS, translating hardware-specific operations into standard OS calls.'
+            };
+            scene.add(device);
+            devices.push(device);
+        }
+        
+        // User Applications
+        const appGeometry = new THREE.CylinderGeometry(0.8, 0.8, 5, 32);
+        const appMaterial = new THREE.MeshPhongMaterial({ 
+            color: colors.application,
+            shininess: 80
+        });
+        
+        const applications = [];
+        for (let i = 0; i < 10; i++) {
+            const app = new THREE.Mesh(appGeometry, appMaterial);
+            const angle = (i / 10) * Math.PI * 2;
+            const radius = 25;
+            app.position.x = Math.cos(angle) * radius;
+            app.position.y = Math.sin(angle) * radius;
+            app.position.z = (Math.random() - 0.5) * 10;
+            app.rotation.z = Math.PI / 2;
+            app.rotation.y = angle;
+            app.userData = { 
+                type: 'User Applications',
+                description: 'Programs that run in user space and utilize OS services through system calls.'
+            };
+            scene.add(app);
+            applications.push(app);
+        }
+        
+        // Create connections (lines) between components
+        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
+        
+        // Connect kernel to various subsystems
+        function createConnection(start, end) {
+            const points = [];
+            points.push(new THREE.Vector3(start.position.x, start.position.y, start.position.z));
+            points.push(new THREE.Vector3(end.position.x, end.position.y, end.position.z));
+            
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const line = new THREE.Line(geometry, lineMaterial);
+            scene.add(line);
+            return line;
+        }
+        
+        // Connect kernel to all processes
+        processes.forEach(process => {
+            createConnection(kernel, process);
+        });
+        
+        // Connect kernel to file system
+        createConnection(kernel, fileSystem);
+        
+        // Connect kernel to devices
+        devices.forEach(device => {
+            createConnection(kernel, device);
+        });
+        
+        // Connect applications to processes (random connections)
+        applications.forEach(app => {
+            const randomProcess = processes[Math.floor(Math.random() * processes.length)];
+            createConnection(app, randomProcess);
+        });
+        
+        // Mouse interaction setup
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let selectedObject = null;
+        
+        // Create tooltip for object information
+        const tooltip = document.createElement('div');
+        tooltip.style.position = 'absolute';
+        tooltip.style.background = 'rgba(0,0,0,0.8)';
+        tooltip.style.color = 'white';
+        tooltip.style.padding = '10px';
+        tooltip.style.borderRadius = '5px';
+        tooltip.style.display = 'none';
+        tooltip.style.zIndex = '1000';
+        tooltip.style.maxWidth = '300px';
+        document.body.appendChild(tooltip);
+        
+        // Handle mouse movement
+        function onMouseMove(event) {
+            // Calculate mouse position in normalized device coordinates
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            
+            // Update the tooltip position
+            tooltip.style.left = event.clientX + 10 + 'px';
+            tooltip.style.top = event.clientY + 10 + 'px';
+        }
+        
+        // Handle object selection
+        function onMouseClick(event) {
+            // Update the picking ray with the camera and mouse position
+            raycaster.setFromCamera(mouse, camera);
+            
+            // Calculate objects intersecting the picking ray
+            const intersects = raycaster.intersectObjects(scene.children);
+            
+            if (intersects.length > 0) {
+                const object = intersects[0].object;
+                
+                // Only show tooltip for objects with userData
+                if (object.userData && object.userData.type) {
+                    tooltip.innerHTML = `<h3>${object.userData.type}</h3><p>${object.userData.description}</p>`;
+                    tooltip.style.display = 'block';
+                    
+                    // Reset previous selection
+                    if (selectedObject && selectedObject !== object) {
+                        selectedObject.material.emissive.setHex(0x000000);
+                    }
+                    
+                    // Highlight selected object
+                    selectedObject = object;
+                    selectedObject.material.emissive.setHex(0x555555);
+                } else {
+                    tooltip.style.display = 'none';
+                    
+                    // Reset previous selection if any
+                    if (selectedObject) {
+                        selectedObject.material.emissive.setHex(0x000000);
+                        selectedObject = null;
+                    }
+                }
+            } else {
+                tooltip.style.display = 'none';
+                
+                // Reset previous selection if any
+                if (selectedObject) {
+                    selectedObject.material.emissive.setHex(0x000000);
+                    selectedObject = null;
+                }
+            }
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Add event listeners
+        window.addEventListener('mousemove', onMouseMove, false);
+        window.addEventListener('click', onMouseClick, false);
+        window.addEventListener('resize', onWindowResize, false);
+        
+        // Basic camera controls
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        
+        document.addEventListener('mousedown', function(event) {
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+        }, false);
+        
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        }, false);
+        
+        document.addEventListener('mousemove', function(event) {
+            if (isDragging) {
+                const deltaMove = {
+                    x: event.clientX - previousMousePosition.x,
+                    y: event.clientY - previousMousePosition.y
+                };
+                
+                // Rotate the scene based on mouse movement
+                scene.rotation.y += deltaMove.x * 0.01;
+                scene.rotation.x += deltaMove.y * 0.01;
+                
+                previousMousePosition = {
+                    x: event.clientX,
+                    y: event.clientY
+                };
+            }
+        }, false);
+        
+        // Add zoom functionality
+        document.addEventListener('wheel', function(event) {
+            event.preventDefault();
+            
+            if (event.deltaY < 0) {
+                // Zoom in
+                if (camera.position.z > 10) {
+                    camera.position.z -= 1;
+                }
+            } else {
+                // Zoom out
+                if (camera.position.z < 50) {
+                    camera.position.z += 1;
+                }
+            }
+        }, { passive: false });
+        
+        // Animation function with dynamic rotation
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Auto rotate the memory ring
+            memory.rotation.z += 0.005;
+            
+            // Gently pulse the kernel
+            const time = Date.now() * 0.001;
+            kernel.scale.x = 1 + Math.sin(time) * 0.05;
+            kernel.scale.y = 1 + Math.sin(time) * 0.05;
+            kernel.scale.z = 1 + Math.sin(time) * 0.05;
+            
+            // Rotate process objects
+            processes.forEach((process, i) => {
+                const angle = (i / 5) * Math.PI * 2 + time * 0.2;
+                process.position.x = Math.cos(angle) * 12;
+                process.position.y = Math.sin(angle) * 12;
+                process.rotation.x += 0.01;
+                process.rotation.y += 0.01;
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Start animation
+        animate();
+    </script>
+</body>
+</html>

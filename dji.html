@@ -126,8 +126,8 @@ canvas {
 }
 
 .node.source {
-    background-color: #8b5cf6;
-    border-color: #6a0dad;
+    background-color: #c105f5dc;
+    border-color:  #c105f5dc;
 }
 
 .node.target {
@@ -217,7 +217,7 @@ canvas {
     background-color: #252525;
     border-radius: 8px;
     color: white;
-    font-size: 12px;
+    font-size: 19px;
     text-align: left;
 }
 
@@ -318,12 +318,17 @@ canvas {
         </div>
         
         <div class="instructions">
-            <h3>How to use:</h3>
+            <h2>How to use:</h2>
+            ,br>
             <ol>
                 <li>Click "Random Graph" to generate a random graph, or create your own by dragging nodes.</li>
+                <br>
                 <li>Click on a node to set it as the start node (green).</li>
+                <br>
                 <li>Click on another node to set it as the target node (red).</li>
+                <br>
                 <li>Click "Start Algorithm" to initialize Dijkstra's algorithm.</li>
+                <br>
                 <li>Use "Next Step" to proceed through the algorithm step by step, or "Auto Run" to see the entire process.</li>
             </ol>
             <p><strong>Dijkstra's Algorithm</strong> finds the shortest path from a start node to all other nodes in a weighted graph. It works by repeatedly examining the unvisited node with the lowest distance, updating the distances to its neighbors, and marking it as visited.</p>
@@ -428,6 +433,7 @@ canvas {
                     visited: [],
                     currentNode: null,
                     path: [],
+
                     complete: false,
                     started: false
                 };
