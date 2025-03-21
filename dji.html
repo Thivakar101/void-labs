@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dijkstra Algorithm Visualization</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+    font-family: 'Press Start 2P', cursive;
+    margin: 0;
+    padding: 40px;
+    background-color: #121212;
+    color: #ffffff;
+    text-align: center;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    background-color: #1e1e1e;
+    padding: 30px;
+    border-radius: 12px;
+    border: 3px solid #6a0dad;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    color: #c77dff;
+    font-size: 24px;
+    margin-bottom: 25px;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.button-group {
+    display: flex;
+    gap: 15px;
+}
+
+button {
+    padding: 12px 20px;
+    background-color: #6a0dad;
+    color: #ffffff;
+    border: 2px solid #4a0072;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+    font-size: 12px;
+}
+
+button:hover {
+    background-color: #5a0092;
+    transform: scale(1.05);
+}
+
+button:disabled {
+    background-color: #444;
+    border-color: #333;
+    cursor: not-allowed;
+}
+
+select, input {
+    padding: 10px;
+    background-color: #333;
+    color: #ffffff;
+    border: 2px solid #6a0dad;
+    border-radius: 6px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 12px;
+}
+
+.canvas-container {
+    position: relative;
+    margin: 0 auto;
+    border: 3px solid #6a0dad;
+    border-radius: 8px;
+    background-color: #181818;
+    width: 100%;
+    height: 450px;
+    overflow: hidden;
+}
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.info-panel {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #252525;
+    border-radius: 8px;
+    border-left: 5px solid #6a0dad;
+    font-size: 12px;
+}
+
+.node {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #3d3d3d;
+    border: 3px solid #6a0dad;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.3s ease-in-out;
+}
+
+.node:hover {
+    transform: scale(1.1);
+}
+
+.node.source {
+    background-color: #8b5cf6;
+    border-color: #6a0dad;
+}
+
+.node.target {
+    background-color: #ff4f4f;
+    border-color: #b22222;
+}
+
+.node.visited {
+    background-color: #ff79c6;
+    border-color: #ff44aa;
+}
+
+.node.current {
+    background-color: #5a0092;
+    border-color: #4a0072;
+}
+
+.node.shortest-path {
+    background-color: #1abc9c;
+    border-color: #16a085;
+}
+
+.distance {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    gap: 10px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+.source-color {
+    background-color: #8b5cf6;
+    border: 3px solid #6a0dad;
+}
+
+.target-color {
+    background-color: #ff4f4f;
+    border: 3px solid #b22222;
+}
+
+.visited-color {
+    background-color: #ff79c6;
+    border: 3px solid #ff44aa;
+}
+
+.current-color {
+    background-color: #5a0092;
+    border: 3px solid #4a0072;
+}
+
+.path-color {
+    background-color: #1abc9c;
+    border: 3px solid #16a085;
+}
+
+.unvisited-color {
+    background-color: #3d3d3d;
+    border: 3px solid #6a0dad;
+}
+
+.instructions {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #252525;
+    border-radius: 8px;
+    color: white;
+    font-size: 12px;
+    text-align: left;
+}
+
+.step-display {
+    margin-top: 15px;
+    padding: 12px;
+    background-color: #333;
+    border-radius: 8px;
+    font-size: 12px;
+    color: white;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .button-group {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+        font-size: 10px;
+    }
+
+    select, input {
+        width: 100%;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dijkstra's Algorithm Visualization</h1>
+        
+        <div class="controls">
+            <div class="button-group">
+                <button id="reset-btn">Reset</button>
+                <button id="random-btn">Random Graph</button>
+                <select id="graph-size">
+                    <option value="6">Small (6 nodes)</option>
+                    <option value="10" selected>Medium (10 nodes)</option>
+                    <option value="15">Large (15 nodes)</option>
+                </select>
+            </div>
+            
+            <div class="button-group">
+                <button id="start-btn">Start Algorithm</button>
+                <button id="step-btn">Next Step</button>
+                <button id="auto-btn">Auto Run</button>
+                <select id="speed">
+                    <option value="1000">Slow</option>
+                    <option value="500" selected>Medium</option>
+                    <option value="200">Fast</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="edges-canvas"></canvas>
+            <div id="nodes-container"></div>
+        </div>
+        
+        <div class="step-display" id="step-display">
+            <p>Click "Start Algorithm" to begin the visualization. Use "Next Step" to go through the algorithm step by step or "Auto Run" to see the entire process automatically.</p>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color source-color"></div>
+                <span>Start Node</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color target-color"></div>
+                <span>Target Node</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color unvisited-color"></div>
+                <span>Unvisited</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color visited-color"></div>
+                <span>Visited</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color current-color"></div>
+                <span>Current Node</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color path-color"></div>
+                <span>Shortest Path</span>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ol>
+                <li>Click "Random Graph" to generate a random graph, or create your own by dragging nodes.</li>
+                <li>Click on a node to set it as the start node (green).</li>
+                <li>Click on another node to set it as the target node (red).</li>
+                <li>Click "Start Algorithm" to initialize Dijkstra's algorithm.</li>
+                <li>Use "Next Step" to proceed through the algorithm step by step, or "Auto Run" to see the entire process.</li>
+            </ol>
+            <p><strong>Dijkstra's Algorithm</strong> finds the shortest path from a start node to all other nodes in a weighted graph. It works by repeatedly examining the unvisited node with the lowest distance, updating the distances to its neighbors, and marking it as visited.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const canvasContainer = document.querySelector('.canvas-container');
+            const edgesCanvas = document.getElementById('edges-canvas');
+            const nodesContainer = document.getElementById('nodes-container');
+            const startBtn = document.getElementById('start-btn');
+            const stepBtn = document.getElementById('step-btn');
+            const autoBtn = document.getElementById('auto-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const randomBtn = document.getElementById('random-btn');
+            const graphSizeSelect = document.getElementById('graph-size');
+            const speedSelect = document.getElementById('speed');
+            const stepDisplay = document.getElementById('step-display');
+            
+            // Canvas setup
+            const ctx = edgesCanvas.getContext('2d');
+            let containerWidth = canvasContainer.offsetWidth;
+            let containerHeight = canvasContainer.offsetHeight;
+            
+            edgesCanvas.width = containerWidth;
+            edgesCanvas.height = containerHeight;
+            
+            // Graph data
+            let nodes = [];
+            let edges = [];
+            let selectedNode = null;
+            let isDragging = false;
+            let sourceNode = null;
+            let targetNode = null;
+            let currentStep = 0;
+            let algorithmState = {
+                distances: {},
+                previous: {},
+                unvisited: [],
+                visited: [],
+                currentNode: null,
+                path: [],
+                complete: false,
+                started: false
+            };
+            let autoInterval = null;
+            
+            // Initialize
+            setupEventListeners();
+            resetGraph();
+            generateRandomGraph();
+            
+            // Window resize handler
+            window.addEventListener('resize', handleResize);
+            
+            function handleResize() {
+                containerWidth = canvasContainer.offsetWidth;
+                containerHeight = canvasContainer.offsetHeight;
+                
+                edgesCanvas.width = containerWidth;
+                edgesCanvas.height = containerHeight;
+                
+                // Redraw everything
+                drawGraph();
+            }
+            
+            function setupEventListeners() {
+                // Button click handlers
+                startBtn.addEventListener('click', startAlgorithm);
+                stepBtn.addEventListener('click', nextStep);
+                autoBtn.addEventListener('click', toggleAutoRun);
+                resetBtn.addEventListener('click', resetAlgorithm);
+                randomBtn.addEventListener('click', generateRandomGraph);
+                graphSizeSelect.addEventListener('change', generateRandomGraph);
+                
+                // Disable step button initially
+                stepBtn.disabled = true;
+            }
+            
+            function resetGraph() {
+                // Clear all data
+                nodes = [];
+                edges = [];
+                sourceNode = null;
+                targetNode = null;
+                resetAlgorithm();
+                
+                // Clear UI
+                nodesContainer.innerHTML = '';
+                ctx.clearRect(0, 0, containerWidth, containerHeight);
+                stepDisplay.innerHTML = '<p>Click "Start Algorithm" to begin the visualization. Use "Next Step" to go through the algorithm step by step or "Auto Run" to see the entire process automatically.</p>';
+            }
+            
+            function resetAlgorithm() {
+                // Reset algorithm state
+                algorithmState = {
+                    distances: {},
+                    previous: {},
+                    unvisited: [],
+                    visited: [],
+                    currentNode: null,
+                    path: [],
+                    complete: false,
+                    started: false
+                };
+                
+                currentStep = 0;
+                
+                // Reset node classes
+                nodes.forEach(node => {
+                    const nodeElement = document.getElementById(`node-${node.id}`);
+                    if (nodeElement) {
+                        nodeElement.className = 'node';
+                        if (node === sourceNode) nodeElement.classList.add('source');
+                        if (node === targetNode) nodeElement.classList.add('target');
+                    }
+                });
+                
+                // Clear distance labels
+                const distances = document.querySelectorAll('.distance');
+                distances.forEach(dist => dist.remove());
+                
+                // Reset buttons
+                startBtn.disabled = false;
+                stepBtn.disabled = true;
+                
+                if (autoInterval) {
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                    autoBtn.textContent = 'Auto Run';
+                }
+                
+                // Redraw
+                drawGraph();
+            }
+            
+            function generateRandomGraph() {
+                resetGraph();
+                
+                const size = parseInt(graphSizeSelect.value);
+                
+                // Generate nodes
+                for (let i = 0; i < size; i++) {
+                    const padding = 50;
+                    const x = padding + Math.random() * (containerWidth - 2 * padding);
+                    const y = padding + Math.random() * (containerHeight - 2 * padding);
+                    
+                    createNode(x, y);
+                }
+                
+                // Generate edges - connect each node to 2-4 neighbors
+                nodes.forEach(node => {
+                    const sortedByDistance = [...nodes]
+                        .filter(n => n !== node)
+                        .sort((a, b) => {
+                            const distA = Math.sqrt(Math.pow(node.x - a.x, 2) + Math.pow(node.y - a.y, 2));
+                            const distB = Math.sqrt(Math.pow(node.x - b.x, 2) + Math.pow(node.y - b.y, 2));
+                            return distA - distB;
+                        });
+                    
+                    const numConnections = 2 + Math.floor(Math.random() * 3); // 2-4 connections
+                    const neighbors = sortedByDistance.slice(0, Math.min(numConnections, sortedByDistance.length));
+                    
+                    neighbors.forEach(neighbor => {
+                        // Avoid duplicate edges
+                        if (!edges.some(e => 
+                            (e.source === node && e.target === neighbor) || 
+                            (e.source === neighbor && e.target === node)
+                        )) {
+                            // Distance as weight, rounded to integer
+                            const distance = Math.sqrt(Math.pow(node.x - neighbor.x, 2) + Math.pow(node.y - neighbor.y, 2));
+                            const weight = Math.max(1, Math.round(distance / 30));
+                            
+                            edges.push({
+                                source: node,
+                                target: neighbor,
+                                weight: weight
+                            });
+                        }
+                    });
+                });
+                
+                // Randomly select source and target nodes
+                if (nodes.length >= 2) {
+                    sourceNode = nodes[0];
+                    targetNode = nodes[nodes.length - 1];
+                    
+                    document.getElementById(`node-${sourceNode.id}`).classList.add('source');
+                    document.getElementById(`node-${targetNode.id}`).classList.add('target');
+                }
+                
+                drawGraph();
+            }
+            
+            function createNode(x, y) {
+                const id = nodes.length;
+                const node = { id, x, y };
+                nodes.push(node);
+                
+                const nodeElement = document.createElement('div');
+                nodeElement.className = 'node';
+                nodeElement.id = `node-${id}`;
+                nodeElement.textContent = id;
+                nodeElement.style.left = `${x - 20}px`;
+                nodeElement.style.top = `${y - 20}px`;
+                
+                // Node event listeners
+                nodeElement.addEventListener('mousedown', (e) => {
+                    if (algorithmState.started) return;
+                    
+                    selectedNode = node;
+                    isDragging = true;
+                });
+                
+                nodeElement.addEventListener('click', (e) => {
+                    if (algorithmState.started) return;
+                    
+                    if (!isDragging) {
+                        if (!sourceNode) {
+                            sourceNode = node;
+                            nodeElement.classList.add('source');
+                        } else if (!targetNode && node !== sourceNode) {
+                            targetNode = node;
+                            nodeElement.classList.add('target');
+                        } else if (node === sourceNode) {
+                            nodeElement.classList.remove('source');
+                            sourceNode = null;
+                        } else if (node === targetNode) {
+                            nodeElement.classList.remove('target');
+                            targetNode = null;
+                        }
+                    }
+                    
+                    isDragging = false;
+                });
+                
+                nodesContainer.appendChild(nodeElement);
+                return node;
+            }
+            
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging && selectedNode) {
+                    const rect = canvasContainer.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Update node position
+                    selectedNode.x = x;
+                    selectedNode.y = y;
+                    
+                    // Update DOM element
+                    const nodeElement = document.getElementById(`node-${selectedNode.id}`);
+                    nodeElement.style.left = `${x - 20}px`;
+                    nodeElement.style.top = `${y - 20}px`;
+                    
+                    // Redraw
+                    drawGraph();
+                }
+            });
+            
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                selectedNode = null;
+            });
+            
+            function drawGraph() {
+                // Clear canvas
+                ctx.clearRect(0, 0, containerWidth, containerHeight);
+                
+                // Draw edges
+                edges.forEach(edge => {
+                    const source = edge.source;
+                    const target = edge.target;
+                    
+                    // Set line styles
+                    ctx.lineWidth = 2;
+                    
+                    if (algorithmState.path.includes(edge)) {
+                        // Highlight the shortest path
+                        ctx.strokeStyle = '#1abc9c';
+                        ctx.lineWidth = 4;
+                    } else if (
+                        (algorithmState.visited.includes(source) && algorithmState.visited.includes(target)) ||
+                        (algorithmState.currentNode === source && algorithmState.visited.includes(target)) ||
+                        (algorithmState.visited.includes(source) && algorithmState.currentNode === target)
+                    ) {
+                        // Visited edges
+                        ctx.strokeStyle = '#f39c12';
+                    } else {
+                        // Unvisited edges
+                        ctx.strokeStyle = '#bdc3c7';
+                    }
+                    
+                    // Draw the edge
+                    ctx.beginPath();
+                    ctx.moveTo(source.x, source.y);
+                    ctx.lineTo(target.x, target.y);
+                    ctx.stroke();
+                    
+                    // Draw the weight
+                    const midX = (source.x + target.x) / 2;
+                    const midY = (source.y + target.y) / 2;
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(midX, midY, 12, 0, 2 * Math.PI);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.font = '12px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(edge.weight, midX, midY);
+                });
+                
+                // Draw distances if algorithm has started
+                if (algorithmState.started) {
+                    // Clear old distance elements
+                    const oldDistances = document.querySelectorAll('.distance');
+                    oldDistances.forEach(el => el.remove());
+                    
+                    // Create new ones
+                    nodes.forEach(node => {
+                        if (node !== sourceNode) {
+                            const dist = algorithmState.distances[node.id];
+                            if (dist !== Infinity) {
+                                const distElement = document.createElement('div');
+                                distElement.className = 'distance';
+                                distElement.textContent = dist;
+                                distElement.style.left = `${node.x + 25}px`;
+                                distElement.style.top = `${node.y - 30}px`;
+                                nodesContainer.appendChild(distElement);
+                            }
+                        }
+                    });
+                }
+            }
+            
+            function startAlgorithm() {
+                if (!sourceNode || !targetNode) {
+                    stepDisplay.innerHTML = '<p>Please select a start (green) and target (red) node first.</p>';
+                    return;
+                }
+                
+                // Initialize algorithm state
+                algorithmState.started = true;
+                algorithmState.complete = false;
+                algorithmState.unvisited = [...nodes];
+                algorithmState.visited = [];
+                algorithmState.path = [];
+                
+                // Initialize distances
+                nodes.forEach(node => {
+                    algorithmState.distances[node.id] = node === sourceNode ? 0 : Infinity;
+                    algorithmState.previous[node.id] = null;
+                });
+                
+                algorithmState.currentNode = null;
+                
+                // Update UI
+                startBtn.disabled = true;
+                stepBtn.disabled = false;
+                
+                stepDisplay.innerHTML = '<p>Algorithm initialized. Source node distance set to 0, all others to infinity. Click "Next Step" to continue.</p>';
+                
+                drawGraph();
+            }
+            
+            function nextStep() {
+                if (algorithmState.complete) {
+                    stepDisplay.innerHTML = '<p>Algorithm completed! The shortest path is highlighted in teal.</p>';
+                    return;
+                }
+                
+                // First step: select the source node
+                if (algorithmState.currentNode === null) {
+                    algorithmState.currentNode = sourceNode;
+                    algorithmState.unvisited = algorithmState.unvisited.filter(n => n !== sourceNode);
+                    
+                    // Update UI
+                    document.getElementById(`node-${sourceNode.id}`).classList.add('current');
+                    
+                    stepDisplay.innerHTML = `<p>Step ${++currentStep}: Selected source node ${sourceNode.id} as current node with distance 0.</p>`;
+                } 
+                // Process the current node
+                else {
+                    const currentNodeId = algorithmState.currentNode.id;
+                    
+                    // Get all connected edges
+                    const connectedEdges = edges.filter(edge => 
+                        edge.source.id === currentNodeId || edge.target.id === currentNodeId
+                    );
+                    
+                    // Get all neighbors from these edges
+                    const neighbors = connectedEdges.map(edge => 
+                        edge.source.id === currentNodeId ? edge.target : edge.source
+                    ).filter(neighbor => 
+                        !algorithmState.visited.includes(neighbor)
+                    );
+                    
+                    // Update distances to neighbors
+                    let updatedNodes = [];
+                    neighbors.forEach(neighbor => {
+                        const edge = connectedEdges.find(e => 
+                            (e.source.id === currentNodeId && e.target.id === neighbor.id) ||
+                            (e.target.id === currentNodeId && e.source.id === neighbor.id)
+                        );
+                        
+                        const newDistance = algorithmState.distances[currentNodeId] + edge.weight;
+                        
+                        if (newDistance < algorithmState.distances[neighbor.id]) {
+                            algorithmState.distances[neighbor.id] = newDistance;
+                            algorithmState.previous[neighbor.id] = algorithmState.currentNode;
+                            updatedNodes.push(neighbor);
+                        }
+                    });
+                    
+                    // Mark current node as visited
+                    document.getElementById(`node-${currentNodeId}`).classList.remove('current');
+                    
+                    if (algorithmState.currentNode !== sourceNode && algorithmState.currentNode !== targetNode) {
+                        document.getElementById(`node-${currentNodeId}`).classList.add('visited');
+                    }
+                    
+                    algorithmState.visited.push(algorithmState.currentNode);
+                    
+                    // If we've reached the target, reconstruct and display the path
+                    if (algorithmState.currentNode === targetNode) {
+                        algorithmState.complete = true;
+                        
+                        // Reconstruct path
+                        let current = targetNode;
+                        while (current !== sourceNode) {
+                            const prev = algorithmState.previous[current.id];
+                            
+                            // Add the edge to the path
+                            const pathEdge = edges.find(e => 
+                                (e.source === prev && e.target === current) ||
+                                (e.target === prev && e.source === current)
+                            );
+                            
+                            algorithmState.path.unshift(pathEdge);
+                            
+                            // Mark node as part of the path
+                            if (current !== targetNode && current !== sourceNode) {
+                                document.getElementById(`node-${current.id}`).classList.remove('visited');
+                                document.getElementById(`node-${current.id}`).classList.add('shortest-path');
+                            }
+                            
+                            current = prev;
+                        }
+                        
+                        stepDisplay.innerHTML = `<p>Step ${++currentStep}: Target reached! Found shortest path with distance ${algorithmState.distances[targetNode.id]}.</p>`;
+                        
+                        // Disable step button
+                        stepBtn.disabled = true;
+                        
+                        if (autoInterval) {
+                            clearInterval(autoInterval);
+                            autoInterval = null;
+                            autoBtn.textContent = 'Auto Run';
+                        }
+                    } 
+                    // Continue to the next node with the smallest distance
+                    else {
+                        // Find the unvisited node with the smallest distance
+                        let minDistance = Infinity;
+                        let nextNode = null;
+                        
+                        nodes.forEach(node => {
+                            if (!algorithmState.visited.includes(node) && algorithmState.distances[node.id] < minDistance) {
+                                minDistance = algorithmState.distances[node.id];
+                                nextNode = node;
+                            }
+                        });
+                        
+                        // If we have a next node
+                        if (nextNode && minDistance !== Infinity) {
+                            algorithmState.currentNode = nextNode;
+                            document.getElementById(`node-${nextNode.id}`).classList.add('current');
+                            
+                            stepDisplay.innerHTML = `<p>Step ${++currentStep}: Visited node ${currentNodeId}. `;
+                            
+                            if (updatedNodes.length > 0) {
+                                stepDisplay.innerHTML += `Updated distances to: ${updatedNodes.map(n => `node ${n.id} (${algorithmState.distances[n.id]})`).join(', ')}. `;
+                            } else {
+                                stepDisplay.innerHTML += `No distances updated. `;
+                            }
+                            
+                            stepDisplay.innerHTML += `Selected node ${nextNode.id} as next with distance ${minDistance}.</p>`;
+                        } 
+                        // If there's no accessible node left
+                        else {
+                            algorithmState.complete = true;
+                            stepDisplay.innerHTML = `<p>Step ${++currentStep}: No path to target found. Algorithm terminated.</p>`;
+                            stepBtn.disabled = true;
+                            
+                            if (autoInterval) {
+                                clearInterval(autoInterval);
+                                autoInterval = null;
+                                autoBtn.textContent = 'Auto Run';
+                            }
+                        }
+                    }
+                }
+                
+                drawGraph();
+            }
+            
+            function toggleAutoRun() {
+                if (autoInterval) {
+                    // Stop auto run
+                    clearInterval(autoInterval);
+                    autoInterval = null;
+                    autoBtn.textContent = 'Auto Run';
+                } else {
+                    // Start auto run
+                    if (!algorithmState.started) {
+                        startAlgorithm();
+                    }
+                    
+                    if (!algorithmState.complete) {
+                        autoBtn.textContent = 'Stop';
+                        autoInterval = setInterval(() => {
+                            nextStep();
+                            if (algorithmState.complete) {
+                                clearInterval(autoInterval);
+                                autoInterval = null;
+                                autoBtn.textContent = 'Auto Run';
+                            }
+                        }, parseInt(speedSelect.value));
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -21,7 +21,7 @@
         }
         .left {
             width: 50%;
-            background-color: #ffffff; /* Change background color to white */
+            background-color: #ffffff; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -84,7 +84,7 @@
     <script>
         const canvas = document.getElementById('modelCanvas');
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xffffff); // Change background color to white
+        scene.background = new THREE.Color(0xffffff); 
         const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
         renderer.setSize(canvas.clientWidth, canvas.clientHeight);

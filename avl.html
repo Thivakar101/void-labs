@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AVL Tree Visualization</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 5px;
+    }
+    button {
+      margin: 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    input {
+      width: 50px;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <input type="number" id="nodeValue" min="1" max="999" value="50">
+    <button id="insertBtn">Insert</button>
+    <button id="deleteBtn">Delete</button>
+    <button id="resetBtn">Reset</button>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+  <script>
+    // AVL Tree Node class
+    class AVLNode {
+      constructor(value) {
+        this.value = value;
+        this.height = 1;
+        this.left = null;
+        this.right = null;
+        this.mesh = null;
+        this.textMesh = null;
+        this.lineMesh = null;
+      }
+    }
+
+    // AVL Tree implementation
+    class AVLTree {
+      constructor() {
+        this.root = null;
+      }
+
+      // Get height of node
+      height(node) {
+        return node ? node.height : 0;
+      }
+
+      // Get balance factor
+      getBalanceFactor(node) {
+        return node ? this.height(node.left) - this.height(node.right) : 0;
+      }
+
+      // Update height
+      updateHeight(node) {
+        if (node) {
+          node.height = 1 + Math.max(this.height(node.left), this.height(node.right));
+        }
+      }
+
+      // Right rotation
+      rightRotate(y) {
+        const x = y.left;
+        const T2 = x.right;
+
+        x.right = y;
+        y.left = T2;
+
+        this.updateHeight(y);
+        this.updateHeight(x);
+
+        return x;
+      }
+
+      // Left rotation
+      leftRotate(x) {
+        const y = x.right;
+        const T2 = y.left;
+
+        y.left = x;
+        x.right = T2;
+
+        this.updateHeight(x);
+        this.updateHeight(y);
+
+        return y;
+      }
+
+      // Insert a node
+      insert(value) {
+        this.root = this._insert(this.root, value);
+      }
+
+      _insert(node, value) {
+        // Standard BST insert
+        if (!node) {
+          return new AVLNode(value);
+        }
+
+        if (value < node.value) {
+          node.left = this._insert(node.left, value);
+        } else if (value > node.value) {
+          node.right = this._insert(node.right, value);
+        } else {
+          // Duplicate values not allowed
+          return node;
+        }
+
+        // Update height
+        this.updateHeight(node);
+
+        // Get balance factor
+        const balance = this.getBalanceFactor(node);
+
+        // Left Left Case
+        if (balance > 1 && value < node.left.value) {
+          return this.rightRotate(node);
+        }
+
+        // Right Right Case
+        if (balance < -1 && value > node.right.value) {
+          return this.leftRotate(node);
+        }
+
+        // Left Right Case
+        if (balance > 1 && value > node.left.value) {
+          node.left = this.leftRotate(node.left);
+          return this.rightRotate(node);
+        }
+
+        // Right Left Case
+        if (balance < -1 && value < node.right.value) {
+          node.right = this.rightRotate(node.right);
+          return this.leftRotate(node);
+        }
+
+        return node;
+      }
+
+      // Find minimum value node
+      minValueNode(node) {
+        let current = node;
+        while (current.left) {
+          current = current.left;
+        }
+        return current;
+      }
+
+      // Delete a node
+      delete(value) {
+        this.root = this._delete(this.root, value);
+      }
+
+      _delete(root, value) {
+        // Standard BST delete
+        if (!root) {
+          return root;
+        }
+
+        if (value < root.value) {
+          root.left = this._delete(root.left, value);
+        } else if (value > root.value) {
+          root.right = this._delete(root.right, value);
+        } else {
+          // Node with one child or no child
+          if (!root.left) {
+            return root.right;
+          } else if (!root.right) {
+            return root.left;
+          }
+
+          // Node with two children
+          const temp = this.minValueNode(root.right);
+          root.value = temp.value;
+          root.right = this._delete(root.right, temp.value);
+        }
+
+        // If tree had only one node
+        if (!root) {
+          return root;
+        }
+
+        // Update height
+        this.updateHeight(root);
+
+        // Get balance factor
+        const balance = this.getBalanceFactor(root);
+
+        // Left Left Case
+        if (balance > 1 && this.getBalanceFactor(root.left) >= 0) {
+          return this.rightRotate(root);
+        }
+
+        // Left Right Case
+        if (balance > 1 && this.getBalanceFactor(root.left) < 0) {
+          root.left = this.leftRotate(root.left);
+          return this.rightRotate(root);
+        }
+
+        // Right Right Case
+        if (balance < -1 && this.getBalanceFactor(root.right) <= 0) {
+          return this.leftRotate(root);
+        }
+
+        // Right Left Case
+        if (balance < -1 && this.getBalanceFactor(root.right) > 0) {
+          root.right = this.rightRotate(root.right);
+          return this.leftRotate(root);
+        }
+
+        return root;
+      }
+
+      // Calculate node position
+      calculatePositions(node, level, index, positions, maxWidth) {
+        if (!node) return;
+        
+        // Horizontal spacing increases with depth
+        const xSpacing = Math.max(100 / (Math.pow(2, level)), 20);
+        const x = index * xSpacing;
+        const y = -level * 80;
+        
+        positions.set(node, { x, y, level, index });
+        
+        if (node.left) {
+          this.calculatePositions(node.left, level + 1, index - Math.pow(2, maxWidth - level - 1), positions, maxWidth);
+        }
+        
+        if (node.right) {
+          this.calculatePositions(node.right, level + 1, index + Math.pow(2, maxWidth - level - 1), positions, maxWidth);
+        }
+      }
+
+      // Get the height of the tree
+      getTreeHeight(node) {
+        if (!node) return 0;
+        return Math.max(this.getTreeHeight(node.left), this.getTreeHeight(node.right)) + 1;
+      }
+    }
+
+    // Three.js visualization
+    class AVLTreeVisualizer {
+      constructor() {
+        this.tree = new AVLTree();
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(this.renderer.domElement);
+        
+        this.camera.position.z = 300;
+        
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        this.scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(0, 1, 1);
+        this.scene.add(directionalLight);
+        
+        this.setupControls();
+        this.animate();
+      }
+      
+      setupControls() {
+        document.getElementById('insertBtn').addEventListener('click', () => {
+          const value = parseInt(document.getElementById('nodeValue').value);
+          if (!isNaN(value)) {
+            this.tree.insert(value);
+            this.updateVisualization();
+          }
+        });
+        
+        document.getElementById('deleteBtn').addEventListener('click', () => {
+          const value = parseInt(document.getElementById('nodeValue').value);
+          if (!isNaN(value)) {
+            this.tree.delete(value);
+            this.updateVisualization();
+          }
+        });
+        
+        document.getElementById('resetBtn').addEventListener('click', () => {
+          this.reset();
+        });
+      }
+      
+      reset() {
+        this.tree = new AVLTree();
+        
+        // Clear the scene of node visualizations
+        const objectsToRemove = [];
+        this.scene.traverse((object) => {
+          if (object.type === 'Mesh' || object.type === 'Line') {
+            objectsToRemove.push(object);
+          }
+        });
+        
+        objectsToRemove.forEach((object) => {
+          this.scene.remove(object);
+        });
+      }
+      
+      updateVisualization() {
+        // Clear previous visualization
+        const objectsToRemove = [];
+        this.scene.traverse((object) => {
+          if (object.type === 'Mesh' || object.type === 'Line') {
+            objectsToRemove.push(object);
+          }
+        });
+        
+        objectsToRemove.forEach((object) => {
+          this.scene.remove(object);
+        });
+        
+        if (!this.tree.root) return;
+        
+        // Calculate tree height to determine positioning
+        const treeHeight = this.tree.getTreeHeight(this.tree.root);
+        const positions = new Map();
+        
+        // Calculate positions for all nodes
+        this.tree.calculatePositions(this.tree.root, 0, 0, positions, treeHeight);
+        
+        // Create visualization for each node
+        this.visualizeNode(this.tree.root, positions);
+      }
+      
+      visualizeNode(node, positions) {
+        if (!node) return;
+        
+        const pos = positions.get(node);
+        if (!pos) return;
+        
+        // Create sphere for node
+        const geometry = new THREE.SphereGeometry(15, 32, 32);
+        const material = new THREE.MeshPhongMaterial({ 
+          color: this.getBalanceColor(this.tree.getBalanceFactor(node)) 
+        });
+        const sphere = new THREE.Mesh(geometry, material);
+        
+        // Position the sphere
+        sphere.position.set(pos.x, pos.y, 0);
+        this.scene.add(sphere);
+        node.mesh = sphere;
+        
+        // Add text for node value
+        const textCanvas = document.createElement('canvas');
+        textCanvas.width = 64;
+        textCanvas.height = 64;
+        const ctx = textCanvas.getContext('2d');
+        ctx.fillStyle = 'white';
+        ctx.font = '24px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(node.value, 32, 32);
+        
+        const textTexture = new THREE.CanvasTexture(textCanvas);
+        const textMaterial = new THREE.MeshBasicMaterial({
+          map: textTexture,
+          transparent: true,
+          side: THREE.DoubleSide
+        });
+        const textGeometry = new THREE.PlaneGeometry(20, 20);
+        const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+        textMesh.position.set(pos.x, pos.y, 16);
+        this.scene.add(textMesh);
+        
+        // Draw lines to children
+        if (node.left) {
+          const leftPos = positions.get(node.left);
+          this.drawLine(pos.x, pos.y, leftPos.x, leftPos.y);
+          this.visualizeNode(node.left, positions);
+        }
+        
+        if (node.right) {
+          const rightPos = positions.get(node.right);
+          this.drawLine(pos.x, pos.y, rightPos.x, rightPos.y);
+          this.visualizeNode(node.right, positions);
+        }
+      }
+      
+      drawLine(x1, y1, x2, y2) {
+        const material = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+        const geometry = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(x1, y1, 0),
+          new THREE.Vector3(x2, y2, 0)
+        ]);
+        const line = new THREE.Line(geometry, material);
+        this.scene.add(line);
+      }
+      
+      getBalanceColor(balance) {
+        if (balance > 1 || balance < -1) {
+          return 0xff0000; // Red for unbalanced
+        } else if (balance === 1 || balance === -1) {
+          return 0xffaa00; // Orange for borderline
+        } else {
+          return 0x00aaff; // Blue for balanced
+        }
+      }
+      
+      animate() {
+        requestAnimationFrame(() => this.animate());
+        
+        // Add subtle rotation for 3D effect
+        this.scene.rotation.y = Math.sin(Date.now() * 0.001) * 0.1;
+        
+        this.renderer.render(this.scene, this.camera);
+      }
+    }
+
+    // Initialize the visualization
+    const visualizer = new AVLTreeVisualizer();
+
+    // Example: insert some initial nodes
+    [50, 30, 70, 20, 40, 60, 80].forEach(value => {
+      visualizer.tree.insert(value);
+    });
+    visualizer.updateVisualization();
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      visualizer.camera.aspect = window.innerWidth / window.innerHeight;
+      visualizer.camera.updateProjectionMatrix();
+      visualizer.renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
