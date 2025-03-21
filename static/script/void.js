@@ -106,3 +106,85 @@
     setupSectionModel('vr-model', new THREE.TorusKnotGeometry(0.8, 0.3, 100, 16), 0x8a2be2, 4);
     setupSectionModel('twin-model', new THREE.DodecahedronGeometry(1, 0), 0x8a2be2, 4);
     setupSectionModel('metaverse-model', new THREE.BoxGeometry(1, 1, 1), 0x8a2be2, 4);
+
+  // Wait for DOM to load
+document.addEventListener('DOMContentLoaded', function() {
+  // Header scroll effect
+  let lastScrollTop = 0;
+  const header = document.querySelector('header');
+  
+  window.addEventListener('scroll', function() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Header hide/show on scroll
+    if (scrollTop > lastScrollTop && scrollTop > 100) {
+      // Scrolling down & not at the top
+      header.classList.add('header-hidden');
+    } else {
+      // Scrolling up
+      header.classList.remove('header-hidden');
+    }
+    lastScrollTop = scrollTop;
+    
+    // Scroll to top button visibility
+    const scrollTopBtn = document.querySelector('.scroll-top');
+    if (scrollTop > 300) {
+      scrollTopBtn.classList.add('visible');
+    } else {
+      scrollTopBtn.classList.remove('visible');
+    }
+    
+    // Reveal elements on scroll
+    const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    reveals.forEach(reveal => {
+      const windowHeight = window.innerHeight;
+      const elementTop = reveal.getBoundingClientRect().top;
+      const elementVisible = 150;
+      
+      if (elementTop < windowHeight - elementVisible) {
+        reveal.classList.add('active');
+      }
+    });
+    
+    // Service cards staggered animation
+    const serviceCards = document.querySelectorAll('.services-staggered .service-card');
+    serviceCards.forEach(card => {
+      const windowHeight = window.innerHeight;
+      const elementTop = card.getBoundingClientRect().top;
+      const elementVisible = 150;
+      
+      if (elementTop < windowHeight - elementVisible) {
+        card.classList.add('active');
+      }
+    });
+  });
+  
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+    });
+  });
+  
+  // Scroll to top button
+  const scrollTopBtn = document.createElement('a');
+  scrollTopBtn.classList.add('scroll-top');
+  scrollTopBtn.href = '#';
+  scrollTopBtn.setAttribute('aria-label', 'Scroll to top');
+  document.body.appendChild(scrollTopBtn);
+  
+  scrollTopBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  });
+});
