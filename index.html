@@ -15,155 +15,199 @@
   <link rel="stylesheet" href="static/css/void.css">
   <script src="static/script/void.js" defer></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Press Start 2P', cursive;
-      background-color: #121212;
-      color: #ffffff;
+    model-viewer {
+      width: 500px;
+      height: 500px;
+      position: absolute;
+      top: 50%;
+      right: 0;
+      transform: translateY(-50%);
     }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    
+    #contact {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #contact::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(5, 5, 20, 0.9) 0%, rgba(10, 10, 30, 0.8) 100%);
+      z-index: -1;
+    }
+    
+    .contact-terminal {
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: #000;
+      border: 2px solid #8a2be2;
+      border-radius: 10px;
       padding: 20px;
-      background-color: #1e1e1e;
+      box-shadow: 0 0 30px rgba(138, 43, 226, 0.5), 
+                  0 0 60px rgba(138, 43, 226, 0.3), 
+                  0 0 90px rgba(138, 43, 226, 0.1);
+      position: relative;
     }
-    .logo {
+    
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #333;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .terminal-dots {
+      display: flex;
+      margin-right: 15px;
+    }
+    
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .dot-red {
+      background-color: #ff5f56;
+    }
+    
+    .dot-yellow {
+      background-color: #ffbd2e;
+    }
+    
+    .dot-green {
+      background-color: #27c93f;
+    }
+    
+    .terminal-title {
+      color: #8a2be2;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      letter-spacing: 1px;
+    }
+    
+    .terminal-content {
+      padding: 10px 0;
+    }
+    
+    .command-line {
+      display: flex;
+      margin-bottom: 15px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      color: #00ff00;
+    }
+    
+    .prompt {
+      color: #8a2be2;
+      margin-right: 10px;
+    }
+    
+    .command {
+      color: #f1f1f1;
+    }
+    
+    .response {
+      color: #f1f1f1;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      line-height: 1.6;
+      margin-bottom: 25px;
+      padding-left: 20px;
+      border-left: 2px solid #8a2be2;
+    }
+    
+    .typing {
+      display: flex;
+      align-items: center;
+    }
+    
+    .typing-prompt {
+      color: #8a2be2;
+      margin-right: 10px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+    }
+    
+    .typing-input {
+      flex: 1;
+      background-color: transparent;
+      border: none;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      color: white;
+      caret-color: #8a2be2;
+      outline: none;
+      padding: 5px 0;
+    }
+    
+    .cursor {
+      display: inline-block;
+      width: 10px;
+      height: 16px;
+      background-color: #8a2be2;
+      margin-left: 5px;
+      animation: blink 1s infinite;
+    }
+    
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    
+    .contact-methods {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 30px;
+    }
+    
+    .contact-method {
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+    
+    .contact-method:hover {
+      transform: translateY(-5px);
+      filter: brightness(1.2);
+    }
+    
+    .contact-icon {
       font-size: 24px;
       color: #8a2be2;
-    }
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 20px;
-    }
-    nav ul li {
-      display: inline;
-    }
-    nav ul li a {
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    .hero {
-      position: relative;
-      height: 100vh;
-      background: url('static/images/hero-bg.jpg') no-repeat center center/cover;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-    .hero-content {
-      max-width: 600px;
-      padding: 20px;
-      background: rgba(0, 0, 0, 0.5);
-      border-radius: 10px;
-    }
-    .hero-title {
-      font-size: 36px;
-      margin-bottom: 20px;
-    }
-    .hero-subtitle {
-      font-size: 18px;
-      margin-bottom: 20px;
-    }
-    .cta-button {
-      display: inline-block;
-      padding: 10px 20px;
-      background-color: #8a2be2;
-      color: #ffffff;
-      text-decoration: none;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
-    }
-    .cta-button:hover {
-      background-color: #6a0dad;
-    }
-    .section {
-      padding: 60px 20px;
-      text-align: center;
-    }
-    .section-title {
-      font-size: 28px;
-      margin-bottom: 40px;
-      color: #8a2be2;
-    }
-    .services {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .service-card {
-      background-color: #1e1e1e;
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: left;
-    }
-    .service-card h3 {
-      font-size: 20px;
       margin-bottom: 10px;
     }
-    .service-card p {
-      font-size: 14px;
+    
+    .contact-label {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      color: white;
     }
-    .model-container {
-      margin-top: 20px;
-    }
-    #contact {
-      background: url('static/images/contact-bg.jpg') no-repeat center center/cover;
-      color: #ffffff;
-    }
-    .contact-card {
-      background: rgba(0, 0, 0, 0.7);
-      padding: 40px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .contact-card h3 {
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-    .contact-card p {
-      font-size: 16px;
-      margin-bottom: 20px;
-    }
-    .contact-card .cta-button {
-      margin-top: 20px;
-      display: block;
+    
+    .section-title {
       text-align: center;
-    }
-    footer {
-      background-color: #1e1e1e;
-      padding: 20px;
-      text-align: center;
-    }
-    .footer-logo {
-      font-size: 24px;
       color: #8a2be2;
+      margin-bottom: 50px;
+      position: relative;
+      display: inline-block;
+      left: 50%;
+      transform: translateX(-50%);
     }
-    .footer-links {
-      list-style: none;
-      padding: 0;
-      margin: 20px 0;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    .footer-links li {
-      display: inline;
-    }
-    .footer-links li a {
-      color: #ffffff;
-      text-decoration: none;
-      font-size: 14px;
-    }
-    .copyright {
-      font-size: 12px;
-      color: #888;
+    
+    .section-title::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, #8a2be2, transparent);
     }
   </style>
 </head>
@@ -185,7 +229,7 @@
     <div class="hero-content">
       <h1 class="hero-title glitch" data-text="Exploring The Digital Void">Exploring The Digital Void</h1>
       <p class="hero-subtitle">Pioneering innovative solutions for the future of technology. Join us on a journey beyond the limits of what's possible.</p>
-      <a href="hall.html" class="cta-button">Enter the VOID</a>
+      <a href="hall.html" class="cta-button">Get Started</a>
       <model-viewer src="static/models/stanging_astronaut_fl_0321045322_texture.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
     </div>
   </section>
@@ -210,8 +254,8 @@
     <h2 class="section-title">Our Services</h2>
     <div class="services">
       <div class="service-card">
-        <h3>Virtual Experiences</h3>
-        <p>Immerse your audience in captivating virtual experiences that transcend physical limitations and create lasting impressions.</p>
+        <h3>VR/AR Experiences</h3>
+        <p>Immerse your audience in captivating virtual and augmented reality experiences that transcend physical limitations and create lasting impressions.</p>
         <div class="model-container" id="vr-model"></div>
       </div>
       <div class="service-card">
@@ -228,11 +272,62 @@
   </section>
   
   <section id="contact" class="section">
-    <h2 class="section-title">Contact Us</h2>
-    <div class="contact-card">
-      <h3>Get In Touch</h3>
-      <p>Ready to embark on a journey through the digital void? Contact our team today to discuss how we can help bring your vision to life.</p>
-      <a href="mailto:info@voidlabs.inc" class="cta-button">Email Us</a>
+    <h2 class="section-title">ESTABLISH CONNECTION</h2>
+    <div class="contact-terminal">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="dot dot-red"></span>
+          <span class="dot dot-yellow"></span>
+          <span class="dot dot-green"></span>
+        </div>
+        <div class="terminal-title">void_communication_terminal.exe</div>
+      </div>
+      <div class="terminal-content">
+        <div class="command-line">
+          <span class="prompt">void@labs:~$</span>
+          <span class="command">./initialize_contact.sh</span>
+        </div>
+        <div class="response">
+          > Connection established<br>
+          > VOID LABS communication system initialized<br>
+          > Ready to receive your transmission
+        </div>
+        
+        <div class="command-line">
+          <span class="prompt">void@labs:~$</span>
+          <span class="command">./display_contact_info.sh</span>
+        </div>
+        <div class="response">
+          > Ready to embark on a journey through the digital void?<br>
+          > Our team of digital explorers awaits your signal.<br>
+          > Choose your preferred communication channel below.
+        </div>
+        
+        <div class="typing">
+          <span class="typing-prompt">void@labs:~$</span>
+          <input type="text" class="typing-input" placeholder="Type your message here...">
+          <span class="cursor"></span>
+        </div>
+      </div>
+      
+      <div class="contact-methods">
+        <a href="https://discord.gg/rvBB9vqb" target="_blank" class="contact-method">
+          <div class="contact-icon"><i class="fab fa-discord"></i></div>
+          <div class="contact-label">DISCORD</div>
+        </a>
+        <a href="https://www.linkedin.com/company/voidlabs" target="_blank" class="contact-method">
+          <div class="contact-icon"><i class="fab fa-linkedin"></i></div>
+          <div class="contact-label">LINKEDIN</div>
+        <a href="mailto:info@voidlabs.inc" target="_blank" class="contact-method">
+          <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+          <div class="contact-label">E-MAIL</div>
+        </a>
+       <a href="https://twitter.com/voidlabs" target="_blank" class="contact-method">
+          <div class="contact-icon"><i class="fab fa-twitter"></i></div>
+          <div class="contact-label">TWITTER</div>  
+        </a>
+        
+      </div>
     </div>
   </section>
   
