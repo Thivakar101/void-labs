@@ -5,19 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VOIDLABS.inc</title>
   <style>
-    body { margin: 0; }
-    canvas { display: block; }
+    body { 
+      margin: 0; 
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      background-color: #000;
+    }
+    canvas { 
+      display: block; 
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      transition: opacity 1s ease-in-out;
+    }
+    #loading-bar-container {
+      width: 300px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    #loading-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #800080, #ff00ff);
+      border-radius: 5px;
+      transition: width 0.3s ease-out;
+    }
+    .logo {
+      font-size: 2.5rem;
+      color: #fff;
+      margin-bottom: 20px;
+      letter-spacing: 5px;
+      font-weight: bold;
+    }
+    .logo span {
+      color: #ff00ff;
+    }
+    #loading-text {
+      color: #fff;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    .instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+      pointer-events: none;
+      border: 1px solid #800080;
+      box-shadow: 0 0 15px rgba(128, 0, 128, 0.6);
+    }
   </style>
 </head>
 <body>
+  <div id="loading-screen">
+    <div class="logo">VOID<span>LABS</span></div>
+    <div id="loading-bar-container">
+      <div id="loading-bar"></div>
+    </div>
+    <div id="loading-text">Initializing environment...</div>
+  </div>
+  
+  <div class="instructions">
+    WASD to move | Mouse drag to look | F11 for fullscreen
+  </div>
+  
+  <div class="tooltip" id="tooltip"></div>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <script>
+    // Loading screen logic
+    const loadingBar = document.getElementById('loading-bar');
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingText = document.getElementById('loading-text');
+    
+    let loadingProgress = 0;
+    const loadingMessages = [
+      "Initializing environment...",
+      "Constructing virtual space...",
+      "Loading textures...",
+      "Calibrating lighting systems...",
+      "Establishing connection to VOID...",
+      "Almost there..."
+    ];
+    
+    function updateLoadingScreen(progress) {
+      loadingBar.style.width = `${progress}%`;
+      
+      // Update loading message based on progress
+      const messageIndex = Math.floor(progress / 20);
+      if (messageIndex < loadingMessages.length) {
+        loadingText.textContent = loadingMessages[messageIndex];
+      }
+      
+      if (progress >= 100) {
+        setTimeout(() => {
+          loadingScreen.style.opacity = 0;
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+          }, 1000);
+        }, 500);
+      }
+    }
+    
+    // Simulating load progress
+    const loadingInterval = setInterval(() => {
+      loadingProgress += Math.random() * 5;
+      if (loadingProgress > 100) {
+        loadingProgress = 100;
+        clearInterval(loadingInterval);
+      }
+      updateLoadingScreen(loadingProgress);
+    }, 150);
+
+    // Three.js setup
     const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x080808);
+    scene.fog = new THREE.FogExp2(0x080808, 0.05);
+    
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
     // Fullscreen toggle
@@ -37,35 +175,130 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
-    window.addEventListener('resize', onWindowResize)
+    window.addEventListener('resize', onWindowResize);
 
     const wallHeight = 1.9;
 
-    // LIGHTING
-    function addLight(x, y, z) {
-      const light = new THREE.PointLight(0xffffff, 1.5, 9);
+    // Enhanced lighting
+    function addLight(x, y, z, color = 0xffffff, intensity = 1.5, distance = 9) {
+      const light = new THREE.PointLight(color, intensity, distance);
       light.position.set(x, y, z);
       light.castShadow = true;
+      light.shadow.mapSize.width = 1024;
+      light.shadow.mapSize.height = 1024;
+      light.shadow.radius = 2;
       scene.add(light);
+      
+      // Add light visual (optional)
+      const lightSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.05, 16, 16),
+        new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.7 })
+      );
+      lightSphere.position.copy(light.position);
+      scene.add(lightSphere);
+      
+      return light;
     }
 
-    addLight(0, wallHeight, 0);
-    addLight(-4.5, wallHeight, -4.5);
-    addLight(4.5, wallHeight, -4.5);
-    addLight(-4.5, wallHeight, 4.5);
-    addLight(4.5, wallHeight, 4.5);
+    // Main ambient light
+    const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
+    scene.add(ambientLight);
+
+    // Dynamic colorful lights
+    const centerLight = addLight(0, wallHeight, 0, 0x9966ff, 2, 10);
+    const cornerLight1 = addLight(-4.5, wallHeight, -4.5, 0xff66cc, 1.5, 8);
+    const cornerLight2 = addLight(4.5, wallHeight, -4.5, 0x66ffcc, 1.5, 8);
+    const cornerLight3 = addLight(-4.5, wallHeight, 4.5, 0xffcc66, 1.5, 8);
+    const cornerLight4 = addLight(4.5, wallHeight, 4.5, 0x66ccff, 1.5, 8);
+
+    // Add floor with grid texture
+    const floorSize = 20;
+    const floorGeometry = new THREE.PlaneGeometry(floorSize, floorSize);
+    const floorMaterial = new THREE.MeshStandardMaterial({
+      color: 0x101010,
+      metalness: 0.8,
+      roughness: 0.3,
+    });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.01;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Add grid lines to floor
+    const gridHelper = new THREE.GridHelper(floorSize, 40, 0x444444, 0x222222);
+    gridHelper.position.y = 0.01;
+    scene.add(gridHelper);
+
+    // Add particle effects
+    const particleCount = 1000;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 10;
+      positions[i + 1] = Math.random() * 5;
+      positions[i + 2] = (Math.random() - 0.5) * 10;
+    }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.025,
+      transparent: true,
+      opacity: 0.6,
+    });
+    
+    const particleSystem = new THREE.Points(particles, particleMaterial);
+    scene.add(particleSystem);
 
     // Load GLTF Model
+    let gltfModel, botModel;
     const loader = new THREE.GLTFLoader();
+    
+    // Load hall model
     loader.load('models/hall.glb', function(gltf) {
       gltf.scene.position.set(0, 0, 0);
       gltf.scene.scale.set(4, 4, 4);
 
       gltf.scene.traverse((child) => {
         if (child.isMesh) {
-          child.material = new THREE.MeshStandardMaterial({
-            color: child.material.color,
-          });
+          // Apply materials based on object type
+          if (child.name.includes('wall') || child.name.toLowerCase().includes('wall') || 
+              (child.geometry && child.geometry.type === 'BoxGeometry')) {
+            // Apply attractive wall material with gradient
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0x800080, // Base purple color
+              roughness: 0.5,
+              metalness: 0.3,
+              emissive: 0x200020,
+              emissiveIntensity: 0.2
+            });
+          } else if (child.name.includes('floor') || child.name.toLowerCase().includes('floor')) {
+            // High-gloss floor material
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0x101010,
+              roughness: 0.1,
+              metalness: 0.9,
+            });
+          } else if (child.name.includes('ceiling') || child.name.toLowerCase().includes('ceiling')) {
+            // Dark ceiling with subtle emission
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0x080808,
+              roughness: 0.7,
+              metalness: 0.2,
+              emissive: 0x000020,
+              emissiveIntensity: 0.1
+            });
+          } else {
+            // Default material for other objects
+            child.material = new THREE.MeshStandardMaterial({
+              color: child.material.color || 0x606060,
+              roughness: 0.6,
+              metalness: 0.4,
+            });
+          }
+          
           child.castShadow = true;
           child.receiveShadow = true;
         }
@@ -73,22 +306,39 @@
 
       gltfModel = gltf.scene;
       scene.add(gltfModel);
-    }, undefined, function(error) {
+      
+      // Update loading progress when model is loaded
+      loadingProgress = Math.max(loadingProgress, 80);
+      updateLoadingScreen(loadingProgress);
+    }, 
+    // Progress callback
+    function(xhr) {
+      const progress = (xhr.loaded / xhr.total) * 60;
+      loadingProgress = Math.max(loadingProgress, progress);
+      updateLoadingScreen(loadingProgress);
+    }, 
+    function(error) {
       console.error('Error loading GLTF model:', error);
     });
 
-// Load GLTF Model
-const loader1 = new THREE.GLTFLoader();
-loader1.load('models/bot.glb', function (gltf) {
-  gltf.scene.position.set(-1.2, 0.5, -3.2);
-  gltf.scene.scale.set(0.7, 0.7, 0.7);
-  gltf.scene.rotation.x = Math.PI;
-  gltf.scene.rotation.y = 2.7;
+    // Load bot model
+    const tooltip = document.getElementById('tooltip');
+    const loader1 = new THREE.GLTFLoader();
+    loader1.load('models/bot.glb', function (gltf) {
+      gltf.scene.position.set(-1.2, 0.5, -3.2);
+      gltf.scene.scale.set(0.7, 0.7, 0.7);
+      gltf.scene.rotation.x = Math.PI;
+      gltf.scene.rotation.y = 2.7;
 
       gltf.scene.traverse((child) => {
         if (child.isMesh) {
+          // Create a glowing material for the bot
           child.material = new THREE.MeshStandardMaterial({
-            color: child.material.color,
+            color: 0x9966ff,
+            emissive: 0x6600cc,
+            emissiveIntensity: 0.5,
+            metalness: 0.7,
+            roughness: 0.2,
           });
           child.castShadow = true;
           child.receiveShadow = true;
@@ -100,76 +350,114 @@ loader1.load('models/bot.glb', function (gltf) {
       
       // Add event listener for hover detection
       document.addEventListener("mousemove", onMouseMove);
-
-      // Raycaster for detecting mouse hover
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2();
-      const tooltip = document.createElement("div");
-
-      // Style the tooltip
-      tooltip.style.position = "absolute";
-      tooltip.style.background = "rgba(0, 0, 0, 0.7)";
-      tooltip.style.color = "#fff";
-      tooltip.style.padding = "5px 10px";
-      tooltip.style.borderRadius = "5px";
-      tooltip.style.fontSize = "14px";
-      tooltip.style.display = "none";
-      tooltip.style.pointerEvents = "none";
-      tooltip.innerHTML = "Welcome to VOID LABS"; // Updated text
-      document.body.appendChild(tooltip);
-
-      function onMouseMove(event) {
-        // Convert mouse position to normalized device coordinates (-1 to +1)
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        // Update the raycaster
-        raycaster.setFromCamera(mouse, camera);
-
-        // Check for intersections
-        const intersects = raycaster.intersectObject(gltf.scene, true);
-
-        if (intersects.length > 0) {
-          tooltip.style.display = "block";
-          tooltip.style.left = event.clientX + 10 + "px";
-          tooltip.style.top = event.clientY + 10 + "px";
-        } else {
-          tooltip.style.display = "none";
-        }
-      }
-    }, undefined, function (error) {
+      
+      // Update loading progress when model is loaded
+      loadingProgress = Math.max(loadingProgress, 90);
+      updateLoadingScreen(loadingProgress);
+    }, 
+    // Progress callback
+    function(xhr) {
+      const progress = 60 + (xhr.loaded / xhr.total) * 30;
+      loadingProgress = Math.max(loadingProgress, progress);
+      updateLoadingScreen(loadingProgress);
+    }, 
+    function (error) {
       console.error("Error loading GLTF model:", error);
     });
 
-    // 3D button
-    const buttonGeometry = new THREE.BoxGeometry(0.1, 0.2, 0.1); 
-    const buttonMaterial = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
-    const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
-    button.position.set(0.6, 0.92, -4);
-    scene.add(button);
-
-    function updateMaterials(model) {
-      model.traverse((child) => {
-        if (child.isMesh && child.material.type === 'MeshStandardMaterial') {
-          const oldMaterial = child.material;
-          const newMaterial = new THREE.MeshStandardMaterial({
-            map: oldMaterial.map,
-            color: oldMaterial.color,
-          });
-          child.material = newMaterial;
-          child.material.needsUpdate = true;
-        }
-      });
-    }
-
+    // Raycaster for detecting mouse hover
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
+
+    function onMouseMove(event) {
+      // Convert mouse position to normalized device coordinates (-1 to +1)
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+      // Update the raycaster
+      raycaster.setFromCamera(mouse, camera);
+
+      // Check for intersections with bot
+      let botIntersected = false;
+      if (botModel) {
+        const intersects = raycaster.intersectObject(botModel, true);
+        if (intersects.length > 0) {
+          botIntersected = true;
+          tooltip.style.display = "block";
+          tooltip.style.left = event.clientX + 10 + "px";
+          tooltip.style.top = event.clientY + 10 + "px";
+          tooltip.innerHTML = "Welcome to VOID LABS<br>Your digital frontier";
+        }
+      }
+      
+      // Check for button intersection
+      let buttonIntersected = false;
+      if (elevatorButton) {
+        const buttonIntersects = raycaster.intersectObject(elevatorButton);
+        if (buttonIntersects.length > 0) {
+          buttonIntersected = true;
+          tooltip.style.display = "block";
+          tooltip.style.left = event.clientX + 10 + "px";
+          tooltip.style.top = event.clientY + 10 + "px";
+          tooltip.innerHTML = "Enter the elevator";
+          elevatorButton.material.emissive.set(0x00ff00);
+          elevatorButton.material.emissiveIntensity = 0.8;
+        } else if (elevatorButton.material) {
+          elevatorButton.material.emissiveIntensity = 0.4;
+        }
+      }
+      
+      if (!botIntersected && !buttonIntersected) {
+        tooltip.style.display = "none";
+      }
+    }
+
+    // 3D elevator button with glow effect
+    const buttonGeometry = new THREE.BoxGeometry(0.1, 0.2, 0.1);
+    const buttonMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x00ff00,
+      emissive: 0x00ff00,
+      emissiveIntensity: 0.4,
+      metalness: 0.8,
+      roughness: 0.2
+    });
+    const elevatorButton = new THREE.Mesh(buttonGeometry, buttonMaterial);
+    elevatorButton.position.set(0.6, 0.92, -4);
+    elevatorButton.castShadow = true;
+    scene.add(elevatorButton);
+
+    // Add button glow effect
+    const buttonGlow = new THREE.PointLight(0x00ff00, 1, 0.5);
+    buttonGlow.position.copy(elevatorButton.position);
+    scene.add(buttonGlow);
+
+    // Button frame
+    const buttonFrameGeometry = new THREE.BoxGeometry(0.15, 0.25, 0.05);
+    const buttonFrameMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x333333,
+      metalness: 0.9,
+      roughness: 0.2
+    });
+    const buttonFrame = new THREE.Mesh(buttonFrameGeometry, buttonFrameMaterial);
+    buttonFrame.position.set(0.6, 0.92, -4.03);
+    scene.add(buttonFrame);
+
+    // Button click event
     window.addEventListener('click', (event) => {
       mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
-      if (raycaster.intersectObject(button).length > 0) {
-        window.location.href = "lift.html";
+      
+      const intersects = raycaster.intersectObject(elevatorButton);
+      if (intersects.length > 0) {
+        // Button press animation
+        elevatorButton.position.z += 0.02;
+        elevatorButton.material.emissiveIntensity = 1;
+        
+        setTimeout(() => {
+          elevatorButton.position.z -= 0.02;
+          window.location.href = "lift.html";
+        }, 200);
       }
     });
 
@@ -195,11 +483,38 @@ loader1.load('models/bot.glb', function (gltf) {
       }
     });
 
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     function animate() {
       requestAnimationFrame(animate);
 
+      const time = clock.getElapsedTime();
+
+      // Animate lights colors
+      const hue1 = (time * 0.1) % 1;
+      const hue2 = ((time * 0.1) + 0.33) % 1;
+      const hue3 = ((time * 0.1) + 0.66) % 1;
+      
+      function hueToRgb(h) {
+        const r = Math.abs((h * 6 - 3) % 6 - 3) - 1;
+        const g = 2 - Math.abs((h * 6 - 2) % 6 - 2);
+        const b = 2 - Math.abs((h * 6 - 4) % 6 - 2);
+        return new THREE.Color(
+          Math.max(0, Math.min(1, r)),
+          Math.max(0, Math.min(1, g)),
+          Math.max(0, Math.min(1, b))
+        );
+      }
+      
+      cornerLight1.color = hueToRgb(hue1);
+      cornerLight2.color = hueToRgb(hue2);
+      cornerLight3.color = hueToRgb(hue3);
+      cornerLight4.color = hueToRgb((hue1 + 0.5) % 1);
+      
+      // Animate button glow
+      buttonGlow.intensity = 0.5 + Math.sin(time * 4) * 0.3;
+
+      // Player movement
       const direction = new THREE.Vector3();
       camera.getWorldDirection(direction);
       const right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0)).normalize();
@@ -209,21 +524,37 @@ loader1.load('models/bot.glb', function (gltf) {
       if (keys.a) camera.position.addScaledVector(right, -speed);
       if (keys.d) camera.position.addScaledVector(right, speed);
 
-      //boundaries 
-      camera.position.x = Math.max(-1.2, Math.min(1.2, camera.position.x));  
-      camera.position.z = Math.max(-3.6, Math.min(2, camera.position.z)); 
+      // Movement boundaries 
+      camera.position.x = Math.max(-4, Math.min(4, camera.position.x));  
+      camera.position.z = Math.max(-5, Math.min(5, camera.position.z)); 
+      camera.position.y = 1; // Lock height
 
-      // Floating animation
+      // Animate particle system
+      particleSystem.rotation.y += 0.0005;
+      const positions = particleSystem.geometry.attributes.position.array;
+      for (let i = 0; i < positions.length; i += 3) {
+        positions[i + 1] += Math.sin(time + positions[i] * 0.5) * 0.001;
+        if (positions[i + 1] > 5) positions[i + 1] = 0;
+        if (positions[i + 1] < 0) positions[i + 1] = 5;
+      }
+      particleSystem.geometry.attributes.position.needsUpdate = true;
 
+      // Bot floating animation
       if (botModel) {
-        const time = clock.getElapsedTime();
-        botModel.position.y = Math.sin(time) * 0.1 + 0.5;
+        botModel.position.y = 0.5 + Math.sin(time * 1.5) * 0.1;
+        botModel.rotation.z = Math.sin(time * 0.5) * 0.05;
       }
 
       renderer.render(scene, camera);
     }
 
     animate();
+    
+    // Final loading completion
+    setTimeout(() => {
+      loadingProgress = 100;
+      updateLoadingScreen(loadingProgress);
+    }, 2000);
   </script>
 </body>
 </html>
