@@ -5,20 +5,160 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VOIDLABS.inc</title>
   <style>
-    body { margin: 0; }
-    canvas { display: block; }
+    body { 
+      margin: 0; 
+      font-family: 'Arial', sans-serif;
+      overflow: hidden;
+      background-color: #000;
+    }
+    canvas { 
+      display: block; 
+    }
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #121212;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      transition: opacity 1s ease-in-out;
+    }
+    #loading-bar-container {
+      width: 300px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      margin: 20px 0;
+    }
+    #loading-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #800080, #ff00ff);
+      border-radius: 5px;
+      transition: width 0.3s ease-out;
+    }
+    .logo {
+      font-size: 2.5rem;
+      color: #fff;
+      margin-bottom: 20px;
+      letter-spacing: 5px;
+      font-weight: bold;
+    }
+    .logo span {
+      color: #ff00ff;
+    }
+    #loading-text {
+      color: #fff;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    .instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      color: white;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 14px;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0, 0, 0, 0.8);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      display: none;
+      pointer-events: none;
+      border: 1px solid #800080;
+      box-shadow: 0 0 15px rgba(128, 0, 128, 0.6);
+    }
   </style>
 </head>
 <body>
+  <div id="loading-screen">
+    <div class="logo">VOID<span>LABS</span></div>
+    <div id="loading-bar-container">
+      <div id="loading-bar"></div>
+    </div>
+    <div id="loading-text">Initializing environment...</div>
+  </div>
+  
+  <div class="instructions">
+    WASD to move | Mouse drag to look | F11 for fullscreen
+  </div>
+  
+  <div class="tooltip" id="tooltip"></div>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <script>
+    // Loading screen logic
+    const loadingBar = document.getElementById('loading-bar');
+    const loadingScreen = document.getElementById('loading-screen');
+    const loadingText = document.getElementById('loading-text');
+    
+    let loadingProgress = 0;
+    const loadingMessages = [
+      "Initializing environment...",
+      "Constructing virtual space...",
+      "Loading textures...",
+      "Calibrating lighting systems...",
+      "Establishing connection to VOID...",
+      "Almost there..."
+    ];
+    
+    function updateLoadingScreen(progress) {
+      loadingBar.style.width = `${progress}%`;
+      
+      // Update loading message based on progress
+      const messageIndex = Math.floor(progress / 20);
+      if (messageIndex < loadingMessages.length) {
+        loadingText.textContent = loadingMessages[messageIndex];
+      }
+      
+      if (progress >= 100) {
+        setTimeout(() => {
+          loadingScreen.style.opacity = 0;
+          setTimeout(() => {
+            loadingScreen.style.display = 'none';
+          }, 1000);
+        }, 500);
+      }
+    }
+    
+    // Simulating load progress
+    const loadingInterval = setInterval(() => {
+      loadingProgress += Math.random() * 5;
+      if (loadingProgress > 100) {
+        loadingProgress = 100;
+        clearInterval(loadingInterval);
+      }
+      updateLoadingScreen(loadingProgress);
+    }, 150);
+
+    // Three.js setup
     const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x080808);
+    scene.fog = new THREE.FogExp2(0x080808, 0.05);
+    
     const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
+
+    // Fullscreen toggle
     document.addEventListener('keydown', (event) => {
       if (event.key === 'F11') {
         event.preventDefault();
@@ -35,121 +175,307 @@
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
-    window.addEventListener('resize', onWindowResize)
+    window.addEventListener('resize', onWindowResize);
 
     const wallHeight = 1.6;
 
-    function addLight(x, y, z) {
-      const light = new THREE.PointLight(0xffffff, 1.5, 9);
+    // Enhanced lighting
+    function addLight(x, y, z, color = 0xffffff, intensity = 1.5, distance = 9) {
+      const light = new THREE.PointLight(color, intensity, distance);
       light.position.set(x, y, z);
       light.castShadow = true;
+      light.shadow.mapSize.width = 1024;
+      light.shadow.mapSize.height = 1024;
+      light.shadow.radius = 2;
       scene.add(light);
+      
+      // Add light visual
+      const lightSphere = new THREE.Mesh(
+        new THREE.SphereGeometry(0.05, 16, 16),
+        new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.7 })
+      );
+      lightSphere.position.copy(light.position);
+      scene.add(lightSphere);
+      
+      return light;
     }
 
-    addLight(0, wallHeight, 0);
-    addLight(-4.5, wallHeight, -4.5);
-    addLight(4.5, wallHeight, -4.5);
-    addLight(-4.5, wallHeight, 4.5);
-    addLight(4.5, wallHeight, 4.5);
+    // Main ambient light
+    const ambientLight = new THREE.AmbientLight(0x404060, 0.6);
+    scene.add(ambientLight);
+
+    // Dynamic colorful lights
+    const centerLight = addLight(0, wallHeight, 0, 0x9966ff, 2, 10);
+    const cornerLight1 = addLight(-4.5, wallHeight, -4.5, 0xff66cc, 1.5, 8);
+    const cornerLight2 = addLight(4.5, wallHeight, -4.5, 0x66ffcc, 1.5, 8);
+    const cornerLight3 = addLight(-4.5, wallHeight, 4.5, 0xffcc66, 1.5, 8);
+    const cornerLight4 = addLight(4.5, wallHeight, 4.5, 0x66ccff, 1.5, 8);
+
+    // Add floor with grid texture
+    const floorSize = 20;
+    const floorGeometry = new THREE.PlaneGeometry(floorSize, floorSize);
+    const floorMaterial = new THREE.MeshStandardMaterial({
+      color: 0x101010,
+      metalness: 0.8,
+      roughness: 0.3,
+    });
+    const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.01;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    // Add grid lines to floor
+    const gridHelper = new THREE.GridHelper(floorSize, 40, 0x444444, 0x222222);
+    gridHelper.position.y = 0.01;
+    scene.add(gridHelper);
+
+    // Add particle effects
+    const particleCount = 1000;
+    const particles = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 10;
+      positions[i + 1] = Math.random() * 5;
+      positions[i + 2] = (Math.random() - 0.5) * 10;
+    }
+
+    particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.025,
+      transparent: true,
+      opacity: 0.6,
+    });
+    
+    const particleSystem = new THREE.Points(particles, particleMaterial);
+    scene.add(particleSystem);
 
     // Load GLTF Model
     const loader = new THREE.GLTFLoader();
+    let hallwayModel;
+    
     loader.load('models/hallway.glb', function(gltf) {
       gltf.scene.position.set(0, 0, 0);
       gltf.scene.scale.set(7, 7, 7);
 
       gltf.scene.traverse((child) => {
         if (child.isMesh) {
-          child.material = new THREE.MeshStandardMaterial({
-            color: child.material.color,
-          });
+          // Apply materials based on object type
+          if (child.name.includes('wall') || child.name.toLowerCase().includes('wall') || 
+              (child.geometry && child.geometry.type === 'BoxGeometry')) {
+            // Apply attractive wall material with gradient
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0x800080, // Base purple color
+              roughness: 0.5,
+              metalness: 0.3,
+              emissive: 0x200020,
+              emissiveIntensity: 0.2
+            });
+          } else if (child.name.includes('floor') || child.name.toLowerCase().includes('floor')) {
+            // High-gloss floor material
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0x101010,
+              roughness: 0.1,
+              metalness: 0.9,
+            });
+          } else if (child.name.includes('ceiling') || child.name.toLowerCase().includes('ceiling')) {
+            // Dark ceiling with subtle emission
+            child.material = new THREE.MeshStandardMaterial({
+              color: 0x080808,
+              roughness: 0.7,
+              metalness: 0.2,
+              emissive: 0x000020,
+              emissiveIntensity: 0.1
+            });
+          } else {
+            // Default material for other objects
+            child.material = new THREE.MeshStandardMaterial({
+              color: child.material.color || 0x606060,
+              roughness: 0.6,
+              metalness: 0.4,
+            });
+          }
+          
           child.castShadow = true;
           child.receiveShadow = true;
         }
       });
 
-      scene.add(gltf.scene);
-    }, undefined, function(error) {
+      hallwayModel = gltf.scene;
+      scene.add(hallwayModel);
+      
+      // Update loading progress when model is loaded
+      loadingProgress = Math.max(loadingProgress, 80);
+      updateLoadingScreen(loadingProgress);
+    }, 
+    // Progress callback
+    function(xhr) {
+      const progress = (xhr.loaded / xhr.total) * 60;
+      loadingProgress = Math.max(loadingProgress, progress);
+      updateLoadingScreen(loadingProgress);
+    }, 
+    function(error) {
       console.error('Error loading GLTF model:', error);
     });
 
-    // 3D buttons
-    const buttonGeometry = new THREE.BoxGeometry(0.1, 0.2, 0.1); 
+    // 3D buttons with enhanced visuals
+    function createButton(x, y, z, color, href) {
+      const buttonGeometry = new THREE.BoxGeometry(0.12, 0.22, 0.12);
+      const buttonMaterial = new THREE.MeshStandardMaterial({ 
+        color: color,
+        emissive: color,
+        emissiveIntensity: 0.4,
+        metalness: 0.8,
+        roughness: 0.2
+      });
+      const button = new THREE.Mesh(buttonGeometry, buttonMaterial);
+      button.position.set(x, y, z);
+      button.castShadow = true;
+      scene.add(button);
+      
+      // Add button glow effect
+      const buttonGlow = new THREE.PointLight(color, 0.8, 0.5);
+      buttonGlow.position.copy(button.position);
+      scene.add(buttonGlow);
+      
+      // Button frame
+      const buttonFrameGeometry = new THREE.BoxGeometry(0.18, 0.28, 0.06);
+      const buttonFrameMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0x333333,
+        metalness: 0.9,
+        roughness: 0.2
+      });
+      const buttonFrame = new THREE.Mesh(buttonFrameGeometry, buttonFrameMaterial);
+      buttonFrame.position.set(x, y, z - 0.04);
+      scene.add(buttonFrame);
+      
+      return {button, glow: buttonGlow, href};
+    }
     
-    const buttonMaterial1 = new THREE.MeshBasicMaterial({ color: 0x4CAF50 });
-    const button1 = new THREE.Mesh(buttonGeometry, buttonMaterial1);
-    button1.position.set(1.9, 0.7, -1.8);
-    scene.add(button1);
+    // Create enhanced buttons
+    const buttons = [
+      createButton(1.9, 0.7, -1.8, 0x4CAF50, "lens.html"),
+      createButton(-1.9, 0.7, -1.8, 0xFF5733, "str.html"),
+      createButton(0.45, 0.7, -3.7, 0x4287f5, "lift.html"),
+      createButton(-1.9, 0.7, 1.8, 0xf54291, "computerlab.html")
+    ];
 
-    const buttonMaterial2 = new THREE.MeshBasicMaterial({ color: 0xFF5733 });
-    const button2 = new THREE.Mesh(buttonGeometry, buttonMaterial2);
-    button2.position.set(-1.9, 0.7, -1.8);
-    scene.add(button2);
-
-    const buttonMaterial3 = new THREE.MeshBasicMaterial({ color: 0x4287f5 });
-    const button3 = new THREE.Mesh(buttonGeometry, buttonMaterial3);
-    button3.position.set(0.45, 0.7, -3.7);
-    scene.add(button3);
-
-    const buttonMaterial4 = new THREE.MeshBasicMaterial({ color: 0xf54291 });
-    const button4 = new THREE.Mesh(buttonGeometry, buttonMaterial4);
-    button4.position.set(-1.9, 0.7, 1.8);
-    scene.add(button4);
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    window.addEventListener('click', (event) => {
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-      raycaster.setFromCamera(mouse, camera);
-      
-      const intersects1 = raycaster.intersectObject(button1);
-      if (intersects1.length > 0) {
-        window.location.href = "lens.html";
-      }
-      
-      const intersects2 = raycaster.intersectObject(button2);
-      if (intersects2.length > 0) {
-        window.location.href = "str.html";
-      }
-
-      const intersects3 = raycaster.intersectObject(button3);
-     if (intersects3.length > 0) {
-     window.location.href = "lift.html";
-     }
-
-      const intersects4 = raycaster.intersectObject(button4);
-      if (intersects4.length > 0) {
-        window.location.href = "computerlab.html";
-      }
-    });
-
+    // Create info boards with better text rendering
     function createBoard(x, y, z, text) {
-        const boardGeometry = new THREE.BoxGeometry(0.7, 0.3, 0.001);
-        const boardMaterial = new THREE.MeshBasicMaterial({ color: 0xD3D3D3 });
-        const board = new THREE.Mesh(boardGeometry, boardMaterial);
-        board.position.set(x, y, z);
-        board.rotation.y = Math.PI / 2;
-        scene.add(board);
+      const boardGeometry = new THREE.BoxGeometry(0.7, 0.3, 0.001);
+      const boardMaterial = new THREE.MeshStandardMaterial({ 
+        color: 0xD3D3D3,
+        roughness: 0.4,
+        metalness: 0.6
+      });
+      const board = new THREE.Mesh(boardGeometry, boardMaterial);
+      board.position.set(x, y, z);
+      board.rotation.y = Math.PI / 2;
+      scene.add(board);
 
-        const boardTextCanvas = document.createElement('canvas');
-        boardTextCanvas.width = 256;
-        boardTextCanvas.height = 128;
-        const boardTextContext = boardTextCanvas.getContext('2d');
-        boardTextContext.fillStyle = 'black';
-        boardTextContext.fillRect(0, 0, boardTextCanvas.width, boardTextCanvas.height);
-        boardTextContext.fillStyle = 'white';
-        boardTextContext.font = '30px Arial';
-        boardTextContext.textAlign = 'center';
-        boardTextContext.fillText(text, boardTextCanvas.width / 2, boardTextCanvas.height / 2);
-        boardMaterial.map = new THREE.CanvasTexture(boardTextCanvas);
-        boardMaterial.needsUpdate = true;
+      const boardTextCanvas = document.createElement('canvas');
+      boardTextCanvas.width = 512;
+      boardTextCanvas.height = 256;
+      const boardTextContext = boardTextCanvas.getContext('2d');
+      boardTextContext.fillStyle = 'rgba(10, 10, 20, 0.9)';
+      boardTextContext.fillRect(0, 0, boardTextCanvas.width, boardTextCanvas.height);
+      
+      // Add gradient border
+      const gradient = boardTextContext.createLinearGradient(0, 0, boardTextCanvas.width, boardTextCanvas.height);
+      gradient.addColorStop(0, "#9966ff");
+      gradient.addColorStop(0.5, "#ff66cc");
+      gradient.addColorStop(1, "#66ccff");
+      boardTextContext.strokeStyle = gradient;
+      boardTextContext.lineWidth = 12;
+      boardTextContext.strokeRect(6, 6, boardTextCanvas.width - 12, boardTextCanvas.height - 12);
+      
+      // Add text with shadow
+      boardTextContext.fillStyle = 'white';
+      boardTextContext.font = 'bold 48px Arial';
+      boardTextContext.textAlign = 'center';
+      boardTextContext.textBaseline = 'middle';
+      boardTextContext.shadowColor = '#9966ff';
+      boardTextContext.shadowBlur = 10;
+      boardTextContext.fillText(text, boardTextCanvas.width / 2, boardTextCanvas.height / 2);
+      
+      const texture = new THREE.CanvasTexture(boardTextCanvas);
+      boardMaterial.map = texture;
+      boardMaterial.transparent = true;
+      boardMaterial.needsUpdate = true;
     }
 
     createBoard(1.85, 1.58, -1.58, 'Gas laws');
     createBoard(-1.75, 1.58, -1.58, 'Solar system');
 
+    // Tooltip for button interactions
+    const tooltip = document.getElementById('tooltip');
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    
+    function onMouseMove(event) {
+      // Convert mouse position to normalized device coordinates (-1 to +1)
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+      // Update the raycaster
+      raycaster.setFromCamera(mouse, camera);
+
+      // Check for intersections with buttons
+      let buttonIntersected = false;
+      const descriptions = [
+        "Gas Laws Lab", 
+        "Solar System", 
+        "Elevator Simulation", 
+        "Computer Lab"
+      ];
+      
+      buttons.forEach((buttonObj, index) => {
+        const intersects = raycaster.intersectObject(buttonObj.button);
+        if (intersects.length > 0) {
+          buttonIntersected = true;
+          tooltip.style.display = "block";
+          tooltip.style.left = event.clientX + 10 + "px";
+          tooltip.style.top = event.clientY + 10 + "px";
+          tooltip.innerHTML = descriptions[index];
+          buttonObj.button.material.emissiveIntensity = 0.8;
+          buttonObj.glow.intensity = 1.5;
+        } else if (buttonObj.button.material) {
+          buttonObj.button.material.emissiveIntensity = 0.4;
+          buttonObj.glow.intensity = 0.8;
+        }
+      });
+      
+      if (!buttonIntersected) {
+        tooltip.style.display = "none";
+      }
+    }
+    
+    document.addEventListener("mousemove", onMouseMove);
+
+    // Click event for buttons
+    window.addEventListener('click', (event) => {
+      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      raycaster.setFromCamera(mouse, camera);
+      
+      buttons.forEach((buttonObj) => {
+        const intersects = raycaster.intersectObject(buttonObj.button);
+        if (intersects.length > 0) {
+          // Button press animation
+          buttonObj.button.position.z += 0.03;
+          buttonObj.button.material.emissiveIntensity = 1;
+          
+          setTimeout(() => {
+            buttonObj.button.position.z -= 0.03;
+            window.location.href = buttonObj.href;
+          }, 200);
+        }
+      });
+    });
+
+    // Camera Position
     camera.position.set(0, 1, -4);
     camera.rotation.y = Math.PI; 
 
@@ -172,9 +498,35 @@
       }
     });
 
+    const clock = new THREE.Clock();
+
     function animate() {
       requestAnimationFrame(animate);
+      
+      const time = clock.getElapsedTime();
+      
+      // Animate lights colors
+      const hue1 = (time * 0.1) % 1;
+      const hue2 = ((time * 0.1) + 0.33) % 1;
+      const hue3 = ((time * 0.1) + 0.66) % 1;
+      
+      function hueToRgb(h) {
+        const r = Math.abs((h * 6 - 3) % 6 - 3) - 1;
+        const g = 2 - Math.abs((h * 6 - 2) % 6 - 2);
+        const b = 2 - Math.abs((h * 6 - 4) % 6 - 2);
+        return new THREE.Color(
+          Math.max(0, Math.min(1, r)),
+          Math.max(0, Math.min(1, g)),
+          Math.max(0, Math.min(1, b))
+        );
+      }
+      
+      cornerLight1.color = hueToRgb(hue1);
+      cornerLight2.color = hueToRgb(hue2);
+      cornerLight3.color = hueToRgb(hue3);
+      cornerLight4.color = hueToRgb((hue1 + 0.5) % 1);
 
+      // Movement
       const direction = new THREE.Vector3();
       camera.getWorldDirection(direction);
       const right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0, 1, 0)).normalize();
@@ -184,13 +536,37 @@
       if (keys.a) camera.position.addScaledVector(right, -speed);
       if (keys.d) camera.position.addScaledVector(right, speed);
 
+      // Movement boundaries
       camera.position.x = Math.max(-1.2, Math.min(1.2, camera.position.x));  
-      camera.position.z = Math.max(-3, Math.min(3, camera.position.z)); 
+      camera.position.z = Math.max(-3, Math.min(3, camera.position.z));
+      camera.position.y = 1; // Lock height
+      
+      // Animate particle system
+      particleSystem.rotation.y += 0.0005;
+      const positions = particleSystem.geometry.attributes.position.array;
+      for (let i = 0; i < positions.length; i += 3) {
+        positions[i + 1] += Math.sin(time + positions[i] * 0.5) * 0.001;
+        if (positions[i + 1] > 5) positions[i + 1] = 0;
+        if (positions[i + 1] < 0) positions[i + 1] = 5;
+      }
+      particleSystem.geometry.attributes.position.needsUpdate = true;
+      
+      // Animate buttons
+      buttons.forEach((buttonObj, index) => {
+        buttonObj.button.rotation.y = time * 0.2 + index * Math.PI/2;
+        buttonObj.glow.position.y = buttonObj.button.position.y + Math.sin(time * 2 + index) * 0.03;
+      });
 
       renderer.render(scene, camera);
     }
 
     animate();
+    
+    // Final loading completion
+    setTimeout(() => {
+      loadingProgress = 100;
+      updateLoadingScreen(loadingProgress);
+    }, 2000);
   </script>
 </body>
 </html>
