@@ -324,7 +324,7 @@
     // Load bot model
     const tooltip = document.getElementById('tooltip');
     const loader1 = new THREE.GLTFLoader();
-    loader1.load('models/bot.glb', function (gltf) {
+    loader1.load('models/purplebot.glb', function (gltf) {
       gltf.scene.position.set(-1.2, 0.5, -3.2);
       gltf.scene.scale.set(0.7, 0.7, 0.7);
       gltf.scene.rotation.x = Math.PI;
@@ -333,13 +333,7 @@
       gltf.scene.traverse((child) => {
         if (child.isMesh) {
           // Create a glowing material for the bot
-          child.material = new THREE.MeshStandardMaterial({
-            color: 0x9966ff,
-            emissive: 0x6600cc,
-            emissiveIntensity: 0.5,
-            metalness: 0.7,
-            roughness: 0.2,
-          });
+     
           child.castShadow = true;
           child.receiveShadow = true;
         }
