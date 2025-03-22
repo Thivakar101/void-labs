@@ -16,12 +16,13 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #1a1a1a; /* Dark background */
+            color: #d7c5f9; /* Light purple text */
         }
         
         #header {
             background-color: #2c3e50;
-            color: white;
+            color: #d7c5f9; /* Light purple text */
             padding: 10px 20px;
             text-align: center;
         }
@@ -33,32 +34,32 @@
         
         #circuit-canvas {
             flex: 2;
-            border-right: 1px solid #ccc;
+            border-right: 1px solid #444; /* Dark border */
         }
         
         #control-panel {
             flex: 1;
             padding: 20px;
             overflow-y: auto;
-            background-color: #ecf0f1;
+            background-color: #2c2c2c; /* Dark background */
             max-width: 400px;
         }
         
         .component-section {
             margin-bottom: 20px;
-            background-color: white;
+            background-color: #333; /* Dark background */
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); /* Dark shadow */
         }
         
         h3 {
             margin-top: 0;
-            color: #2c3e50;
+            color: #d7c5f9; /* Light purple text */
         }
         
         .component-button {
-            background-color: #3498db;
+            background-color: #6a4d96; /* Purple button */
             color: white;
             border: none;
             padding: 8px 16px;
@@ -69,7 +70,7 @@
         }
         
         .component-button:hover {
-            background-color: #2980b9;
+            background-color: #5a3d86; /* Darker purple on hover */
         }
         
         .form-group {
@@ -80,37 +81,41 @@
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
-            color: #555;
+            color: #d7c5f9; /* Light purple text */
         }
         
         input, select {
             width: 100%;
             padding: 8px;
-            border: 1px solid #ddd;
+            border: 1px solid #555; /* Dark border */
             border-radius: 4px;
             box-sizing: border-box;
+            background-color: #444; /* Dark background */
+            color: #d7c5f9; /* Light purple text */
         }
         
         #analysis-results {
             margin-top: 20px;
-            background-color: white;
+            background-color: #333; /* Dark background */
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5); /* Dark shadow */
+            height: 400px; /* Increased height */
         }
         
         #results-content {
             white-space: pre-wrap;
             font-family: monospace;
-            background-color: #f8f9fa;
+            background-color: #2c2c2c; /* Dark background */
             padding: 10px;
             border-radius: 4px;
-            max-height: 300px;
+            height: 100%; /* Fill the parent container */
             overflow-y: auto;
+            color: #d7c5f9; /* Light purple text */
         }
         
         .action-button {
-            background-color: #27ae60;
+            background-color: #6a4d96; /* Purple button */
             color: white;
             border: none;
             padding: 12px 20px;
@@ -123,7 +128,7 @@
         }
         
         .action-button:hover {
-            background-color: #219653;
+            background-color: #5a3d86; /* Darker purple on hover */
         }
         
         .delete-button {
@@ -145,7 +150,7 @@
         #mode-indicator {
             padding: 8px;
             margin-bottom: 15px;
-            background-color: #3498db;
+            background-color: #6a4d96; /* Purple background */
             color: white;
             border-radius: 4px;
             text-align: center;
@@ -158,7 +163,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0,0,0,0.8); /* Dark overlay */
             z-index: 1000;
         }
         
@@ -167,13 +172,14 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: white;
+            background-color: #333; /* Dark background */
             padding: 20px;
             border-radius: 8px;
             width: 80%;
             max-width: 800px;
             max-height: 80vh;
             overflow-y: auto;
+            color: #d7c5f9; /* Light purple text */
         }
         
         .close-button {
@@ -182,6 +188,7 @@
             right: 10px;
             font-size: 24px;
             cursor: pointer;
+            color: #d7c5f9; /* Light purple text */
         }
     </style>
 </head>
