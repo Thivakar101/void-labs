@@ -364,7 +364,8 @@
       createButton(2.0, 0.7, -1.8, 0x4CAF50, "ds.html"),
       createButton(-2.0, 0.7, -1.8, 0xFF5733, "dji.html"),
       createButton(0.45, 0.7, -3.7, 0x4287f5, "lift.html"),
-      createButton(-2.0, 0.7, 1.8, 0xf54291, "csa.html")
+      createButton(-2.0, 0.7, 1.8, 0xf54291, "csa.html"),
+      createButton(2.0, 0.7, 1.8, 0x4CAF50, "quiz.html"),
     ];
 
     // Create info boards with better text rendering
@@ -411,9 +412,10 @@
       boardMaterial.needsUpdate = true;
     }
 
-    createBoard(1.85, 1.58, -1.58, 'Data Structure Basic');
+    createBoard(1.85, 1.58, -1.58, 'Data Structure Basics');
     createBoard(-1.75, 1.58, -1.58, 'Dijkstra Algorithm');
     createBoard(-1.75, 1.58, 1.9, 'CPU Scheduling');
+    createBoard(1.85, 1.58, 1.9, 'Data Structure Quiz');
 
     // Tooltip for button interactions
     const tooltip = document.getElementById('tooltip');
@@ -434,7 +436,8 @@
         "Data Structure Basics", 
         "Dijkstra's Algorithm", 
         "Elevator Simulation", 
-        "CPU Scheduling Algorithms"
+        "CPU Scheduling Algorithms",
+        "Data Structure Quiz"
       ];
       
       buttons.forEach((buttonObj, index) => {

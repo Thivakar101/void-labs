@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Quest | Test Your Algorithm Knowledge</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --dark-bg: #0a0a0a;
+            --purple-primary: #8a2be2;
+            --purple-secondary: #9370db;
+            --purple-accent: #ba55d3;
+            --text-light: #f8f8f8;
+            --text-dark: #333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+        
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(10, 10, 10, 0.7);
+            border-radius: 10px;
+            border: 2px solid var(--purple-primary);
+            box-shadow: 0 0 20px var(--purple-primary);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--purple-primary), var(--purple-accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--purple-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .quiz-container {
+            background: rgba(10, 10, 10, 0.8);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.3);
+            border: 1px solid var(--purple-secondary);
+        }
+        
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--purple-secondary);
+        }
+        
+        .question-number {
+            font-size: 1.5rem;
+            color: var(--purple-accent);
+            font-weight: bold;
+        }
+        
+        .question-score {
+            background: rgba(138, 43, 226, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--purple-primary);
+        }
+        
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .option {
+            padding: 1rem;
+            background: rgba(30, 30, 30, 0.6);
+            border: 2px solid rgba(138, 43, 226, 0.5);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .option:hover {
+            background: rgba(50, 50, 50, 0.8);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.4);
+        }
+        
+        .option.selected {
+            background: rgba(138, 43, 226, 0.3);
+            border-color: var(--purple-primary);
+        }
+        
+        .option.correct {
+            background: rgba(50, 205, 50, 0.3);
+            border-color: #32cd32;
+        }
+        
+        .option.incorrect {
+            background: rgba(220, 20, 60, 0.3);
+            border-color: #dc143c;
+        }
+        
+        .feedback {
+            margin-top: 2rem;
+            padding: 1rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .feedback.visible {
+            opacity: 1;
+        }
+        
+        .feedback.correct {
+            background: rgba(50, 205, 50, 0.2);
+            border: 1px solid #32cd32;
+            color: #9eff9e;
+        }
+        
+        .feedback.incorrect {
+            background: rgba(220, 20, 60, 0.2);
+            border: 1px solid #dc143c;
+            color: #ff9e9e;
+        }
+        
+        .explanation {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(40, 40, 40, 0.6);
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .explanation.visible {
+            display: block;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        button {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, var(--purple-primary), var(--purple-secondary));
+            color: var(--text-light);
+            border: 1px solid var(--purple-accent);
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(138, 43, 226, 0.5);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .code-snippet {
+            background: rgba(30, 30, 30, 0.8);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            border-left: 3px solid var(--purple-primary);
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .score-display {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: 8px;
+            border: 1px solid var(--purple-secondary);
+        }
+        
+        .score-value {
+            font-size: 2rem;
+            color: var(--purple-accent);
+            font-weight: bold;
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(138, 43, 226, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(138, 43, 226, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(138, 43, 226, 0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    
+    <div class="container">
+        <header>
+            <h1>DSA QUEST</h1>
+            <p class="subtitle">Test your Data Structures & Algorithms knowledge</p>
+        </header>
+        
+        <div class="quiz-container">
+            <div class="quiz-header">
+                <div class="question-number">Question <span id="current-question">1</span> of <span id="total-questions">10</span></div>
+                <div class="question-score">Score: <span id="score">0</span></div>
+            </div>
+            
+            <div class="question-text" id="question-text">Loading question...</div>
+            
+            <div class="options-container" id="options-container">
+                <!-- Options will be inserted here -->
+            </div>
+            
+            <div class="feedback" id="feedback">
+                <!-- Feedback will appear here -->
+            </div>
+            
+            <div class="explanation" id="explanation">
+                <!-- Explanation will appear here -->
+            </div>
+            
+            <div class="buttons">
+                <button id="prev-btn" disabled>Previous</button>
+                <button id="next-btn" disabled>Next Question</button>
+            </div>
+        </div>
+        
+        <div class="score-display" id="final-score" style="display: none;">
+            <h2>Final Score</h2>
+            <div class="score-value" id="final-score-value">0/10</div>
+            <button id="restart-btn" class="pulse" style="margin-top: 1rem;">Restart Quiz</button>
+        </div>
+    </div>
+    
+    <script>
+        // Three.js Animation Setup
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 0);
+        container.appendChild(renderer.domElement);
+        
+        // Create particles
+        const particlesGeometry = new THREE.BufferGeometry();
+        const particlesCount = 2000;
+        
+        const posArray = new Float32Array(particlesCount * 3);
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 10;
+        }
+        
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+        
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.025,
+            color: 0x8a2be2,
+            transparent: true,
+            opacity: 0.8
+        });
+        
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+        
+        camera.position.z = 5;
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            particlesMesh.rotation.x += 0.0005;
+            particlesMesh.rotation.y += 0.0003;
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Quiz Data - DSA Questions
+        const quizData = [
+            {
+                question: "What is the time complexity of binary search?",
+                options: [
+                    "O(n)",
+                    "O(log n)",
+                    "O(n log n)",
+                    "O(1)"
+                ],
+                correct: 1,
+                explanation: "Binary search has a time complexity of O(log n) because in each step, it divides the search space in half, resulting in a logarithmic number of comparisons."
+            },
+            {
+                question: "Which data structure follows the Last In First Out (LIFO) principle?",
+                options: [
+                    "Queue",
+                    "Stack",
+                    "Linked List",
+                    "Binary Tree"
+                ],
+                correct: 1,
+                explanation: "A stack follows the Last In First Out (LIFO) principle, where the last element added is the first one to be removed."
+            },
+            {
+                question: "What is the worst-case time complexity of quicksort?",
+                options: [
+                    "O(n)",
+                    "O(n log n)",
+                    "O(n²)",
+                    "O(log n)"
+                ],
+                correct: 2,
+                explanation: "The worst-case time complexity of quicksort is O(n²), which occurs when the pivot chosen is always the smallest or largest element, resulting in highly unbalanced partitions."
+            },
+            {
+                question: "What data structure would you use to implement a breadth-first search (BFS)?",
+                options: [
+                    "Stack",
+                    "Queue",
+                    "Hash Table",
+                    "Heap"
+                ],
+                correct: 1,
+                explanation: "A queue is used in BFS to keep track of nodes to visit next in a level-by-level manner, following the First In First Out (FIFO) principle."
+            },
+            {
+                question: "Which of the following is NOT an in-place sorting algorithm?",
+                options: [
+                    "Bubble Sort",
+                    "Selection Sort",
+                    "Merge Sort",
+                    "Insertion Sort"
+                ],
+                correct: 2,
+                explanation: "Merge Sort is not an in-place sorting algorithm as it requires O(n) extra space for merging the sorted subarrays."
+            },
+            {
+                question: "What does the following code snippet calculate?",
+                options: [
+                    "Factorial of n",
+                    "Fibonacci number",
+                    "Sum of first n numbers",
+                    "Power of 2"
+                ],
+                correct: 0,
+                explanation: "This is a recursive function that calculates the factorial of n. For each recursive call, it multiplies n by the factorial of (n-1) until reaching the base case of n=1."
+            },
+            {
+                question: "Consider the following code: <div class='code-snippet'>function mystery(n) {\n  if (n <= 1) return n;\n  return mystery(n-1) + mystery(n-2);\n}</div>What does this function compute?",
+                options: [
+                    "Factorial of n",
+                    "nth Fibonacci number",
+                    "Sum of first n natural numbers",
+                    "2 raised to power n"
+                ],
+                correct: 1,
+                explanation: "This is the recursive implementation of the Fibonacci sequence, where each number is the sum of the two preceding ones, with base cases F(0) = 0 and F(1) = 1."
+            },
+            {
+                question: "What is the Big O notation for accessing an element in a hash table in the average case?",
+                options: [
+                    "O(1)",
+                    "O(log n)",
+                    "O(n)",
+                    "O(n log n)"
+                ],
+                correct: 0,
+                explanation: "In the average case, accessing an element in a hash table has a time complexity of O(1) - constant time, making hash tables very efficient for lookups."
+            },
+            {
+                question: "Which traversal of a binary tree visits the root node in between the left and right subtrees?",
+                options: [
+                    "Inorder",
+                    "Preorder",
+                    "Postorder",
+                    "Level-order"
+                ],
+                correct: 0,
+                explanation: "Inorder traversal visits nodes in the order: left subtree, root node, right subtree. This results in nodes being visited in ascending order for a binary search tree."
+            },
+            {
+                question: "What is the space complexity of a recursive implementation of the binary search algorithm?",
+                options: [
+                    "O(1)",
+                    "O(log n)",
+                    "O(n)",
+                    "O(n²)"
+                ],
+                correct: 1,
+                explanation: "The space complexity of recursive binary search is O(log n) due to the call stack depth. Each recursive call divides the array in half, resulting in a logarithmic number of function calls."
+            },
+            {
+                question: "Which of the following data structures is best for implementing a priority queue?",
+                options: [
+                    "Array",
+                    "Linked List",
+                    "Binary Search Tree",
+                    "Heap"
+                ],
+                correct: 3,
+                explanation: "A heap is the ideal data structure for implementing a priority queue. It provides efficient O(log n) operations for both insertion and deletion of the highest-priority element."
+            },
+            {
+                question: "What is the time complexity of finding the minimum element in a min heap?",
+                options: [
+                    "O(1)",
+                    "O(log n)",
+                    "O(n)",
+                    "O(n log n)"
+                ],
+                correct: 0,
+                explanation: "Finding the minimum element in a min heap is an O(1) operation, as the minimum element is always at the root of the heap."
+            },
+            {
+                question: "Which algorithm is commonly used to find the shortest path in a weighted graph?",
+                options: [
+                    "Depth-First Search",
+                    "Breadth-First Search",
+                    "Dijkstra's Algorithm",
+                    "Binary Search"
+                ],
+                correct: 2,
+                explanation: "Dijkstra's Algorithm is commonly used to find the shortest path between nodes in a graph with non-negative edge weights."
+            },
+            {
+                question: "What data structure is typically used to implement a trie?",
+                options: [
+                    "Arrays",
+                    "Linked Lists",
+                    "Hash Tables",
+                    "Trees"
+                ],
+                correct: 3,
+                explanation: "A trie is implemented using tree nodes, where each node contains multiple children (typically one for each possible character in the alphabet)."
+            },
+            {
+                question: "Consider the following code: <div class='code-snippet'>function search(arr, target) {\n  let left = 0, right = arr.length - 1;\n  while (left <= right) {\n    let mid = Math.floor((left + right) / 2);\n    if (arr[mid] === target) return mid;\n    else if (arr[mid] < target) left = mid + 1;\n    else right = mid - 1;\n  }\n  return -1;\n}</div>What algorithm does this implement?",
+                options: [
+                    "Linear Search",
+                    "Binary Search",
+                    "Depth-First Search",
+                    "Breadth-First Search"
+                ],
+                correct: 1,
+                explanation: "This is an implementation of binary search. It repeatedly divides the search space in half by comparing the target value with the middle element of the array."
+            }
+        ];
+        
+        // Quiz Variables
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = new Array(quizData.length).fill(false);
+        
+        // DOM Elements
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const currentQuestionElement = document.getElementById('current-question');
+        const totalQuestionsElement = document.getElementById('total-questions');
+        const scoreElement = document.getElementById('score');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const feedbackElement = document.getElementById('feedback');
+        const explanationElement = document.getElementById('explanation');
+        const finalScoreContainer = document.getElementById('final-score');
+        const finalScoreValue = document.getElementById('final-score-value');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        // Initialize Quiz
+        function initQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answeredQuestions = new Array(quizData.length).fill(false);
+            
+            totalQuestionsElement.textContent = quizData.length;
+            scoreElement.textContent = score;
+            
+            loadQuestion();
+            
+            finalScoreContainer.style.display = 'none';
+            document.querySelector('.quiz-container').style.display = 'block';
+        }
+        
+        // Load Question
+        function loadQuestion() {
+            const question = quizData[currentQuestion];
+            
+            currentQuestionElement.textContent = currentQuestion + 1;
+            questionText.innerHTML = question.question;
+            
+            // Clear options
+            optionsContainer.innerHTML = '';
+            
+            // Generate options
+            question.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option');
+                optionElement.innerHTML = option;
+                optionElement.dataset.index = index;
+                
+                optionElement.addEventListener('click', selectOption);
+                
+                // If this question has been answered, show the correct/incorrect state
+                if (answeredQuestions[currentQuestion]) {
+                    if (index === question.correct) {
+                        optionElement.classList.add('correct');
+                    } else if (optionElement.dataset.selected) {
+                        optionElement.classList.add('incorrect');
+                    }
+                    optionElement.removeEventListener('click', selectOption);
+                }
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update buttons
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answeredQuestions[currentQuestion];
+            
+            // Hide feedback and explanation if changing to a new unanswered question
+            if (!answeredQuestions[currentQuestion]) {
+                feedbackElement.classList.remove('visible', 'correct', 'incorrect');
+                explanationElement.classList.remove('visible');
+            } else {
+                // Show explanation for answered questions
+                showExplanation();
+            }
+        }
+        
+        // Select Option
+        function selectOption(e) {
+            if (answeredQuestions[currentQuestion]) return;
+            
+            const selectedOption = e.target;
+            const selectedIndex = parseInt(selectedOption.dataset.index);
+            const correctIndex = quizData[currentQuestion].correct;
+            
+            // Mark question as answered
+            answeredQuestions[currentQuestion] = true;
+            
+            // Update UI
+            const options = optionsContainer.querySelectorAll('.option');
+            options.forEach(option => {
+                const optionIndex = parseInt(option.dataset.index);
+                
+                if (optionIndex === correctIndex) {
+                    option.classList.add('correct');
+                } else if (optionIndex === selectedIndex) {
+                    option.classList.add('selected');
+                    if (optionIndex !== correctIndex) {
+                        option.classList.add('incorrect');
+                    }
+                }
+                
+                // Disable clicking on other options
+                option.removeEventListener('click', selectOption);
+            });
+            
+            // Update score if correct
+            if (selectedIndex === correctIndex) {
+                score++;
+                scoreElement.textContent = score;
+                feedbackElement.textContent = "Correct! Well done!";
+                feedbackElement.classList.add('visible', 'correct');
+            } else {
+                feedbackElement.textContent = "Incorrect! The correct answer is highlighted.";
+                feedbackElement.classList.add('visible', 'incorrect');
+            }
+            
+            // Show explanation
+            showExplanation();
+            
+            // Enable next button
+            nextBtn.disabled = false;
+            
+            // Add animation effect to feedback
+            feedbackElement.classList.add('pulse');
+            setTimeout(() => {
+                feedbackElement.classList.remove('pulse');
+            }, 1500);
+            
+            // Check if all questions are answered
+            if (answeredQuestions.every(answered => answered)) {
+                // Show final score after a delay
+                setTimeout(() => {
+                    showFinalScore();
+                }, 1500);
+            }
+        }
+        
+        // Show Explanation
+        function showExplanation() {
+            explanationElement.textContent = quizData[currentQuestion].explanation;
+            explanationElement.classList.add('visible');
+        }
+        
+        // Show Final Score
+        function showFinalScore() {
+            document.querySelector('.quiz-container').style.display = 'none';
+            finalScoreContainer.style.display = 'block';
+            finalScoreValue.textContent = `${score}/${quizData.length}`;
+            
+            // Add appropriate feedback based on score
+            let feedback = '';
+            const percentage = (score / quizData.length) * 100;
+            
+            if (percentage >= 90) {
+                feedback = "Outstanding! You're a DSA master!";
+            } else if (percentage >= 70) {
+                feedback = "Great job! You have solid DSA knowledge!";
+            } else if (percentage >= 50) {
+                feedback = "Good effort! Keep practicing those algorithms!";
+            } else {
+                feedback = "Keep learning! DSA takes practice.";
+            }
+            
+            const feedbackElement = document.createElement('p');
+            feedbackElement.textContent = feedback;
+            feedbackElement.style.marginTop = '1rem';
+            finalScoreContainer.insertBefore(feedbackElement, restartBtn.parentNode);
+        }
+        
+        // Event Listeners
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        });
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showFinalScore();
+            }
+        });
+        
+        restartBtn.addEventListener('click', initQuiz);
+        
+        // Start Quiz
+        initQuiz();
+    </script>
+</body>
+</html>
