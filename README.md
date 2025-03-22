@@ -15,7 +15,7 @@ VOID LABS is an interactive project featuring a **Lift-Type Navigation System** 
 
 ## Getting Started
 ### Running the Project
-To start the project, **open** `hall.html` in a web browser. This serves as the main entry point for the VOID LABS system.
+To start the project, **open** `index.html` in a web browser. This serves as the main entry point for the VOID LABS system.
 
 ### Installation
 No additional installation is required. Ensure you have a modern web browser (Chrome, Firefox, Edge) for the best experience.
