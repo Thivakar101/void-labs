@@ -38,11 +38,13 @@ h2 {
 }
 
 h3 {
-  font-size: 1.75rem;
+  font-size: 2rem;
 }
 
 p {
   margin-bottom: 1.5rem;
+  font-weight: bold;
+  font-family: sans-serif;
 }
 
 a {
@@ -450,4 +452,199 @@ footer {
   .footer-links li {
     margin: 0.5rem 0;
   }
+}
+
+model-viewer {
+  width: 500px;
+  height: 500px;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+#contact {
+  position: relative;
+  overflow: hidden;
+}
+
+#contact::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(5, 5, 20, 0.9) 0%, rgba(10, 10, 30, 0.8) 100%);
+  z-index: -1;
+}
+
+.contact-terminal {
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: #000;
+  border: 2px solid #8a2be2;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 30px rgba(138, 43, 226, 0.5), 
+              0 0 60px rgba(138, 43, 226, 0.3), 
+              0 0 90px rgba(138, 43, 226, 0.1);
+  position: relative;
+}
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.terminal-dots {
+  display: flex;
+  margin-right: 15px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.dot-red {
+  background-color: #ff5f56;
+}
+
+.dot-yellow {
+  background-color: #ffbd2e;
+}
+
+.dot-green {
+  background-color: #27c93f;
+}
+
+.terminal-title {
+  color: #8a2be2;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.terminal-content {
+  padding: 10px 0;
+}
+
+.command-line {
+  display: flex;
+  margin-bottom: 15px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  color: #00ff00;
+}
+
+.prompt {
+  color: #8a2be2;
+  margin-right: 10px;
+}
+
+.command {
+  color: #f1f1f1;
+}
+
+.response {
+  color: #f1f1f1;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-bottom: 25px;
+  padding-left: 20px;
+  border-left: 2px solid #8a2be2;
+}
+
+.typing {
+  display: flex;
+  align-items: center;
+}
+
+.typing-prompt {
+  color: #8a2be2;
+  margin-right: 10px;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+}
+
+.typing-input {
+  flex: 1;
+  background-color: transparent;
+  border: none;
+  font-family: 'Press Start 2P', cursive;
+  font-size: 12px;
+  color: white;
+  caret-color: #8a2be2;
+  outline: none;
+  padding: 5px 0;
+}
+
+.cursor {
+  display: inline-block;
+  width: 10px;
+  height: 16px;
+  background-color: #8a2be2;
+  margin-left: 5px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.contact-methods {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 30px;
+}
+
+.contact-method {
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+
+.contact-method:hover {
+  transform: translateY(-5px);
+  filter: brightness(1.2);
+}
+
+.contact-icon {
+  font-size: 24px;
+  color: #8a2be2;
+  margin-bottom: 10px;
+}
+
+.contact-label {
+  font-family: 'Press Start 2P', cursive;
+  font-size: 10px;
+  color: white;
+}
+
+.section-title {
+  text-align: center;
+  color: #8a2be2;
+  margin-bottom: 50px;
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #8a2be2, transparent);
 }

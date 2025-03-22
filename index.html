@@ -14,202 +14,6 @@
   <link rel="shortcut icon" href="textures/v.jpg">
   <link rel="stylesheet" href="static/css/void.css">
   <script src="static/script/void.js" defer></script>
-  <style>
-    model-viewer {
-      width: 500px;
-      height: 500px;
-      position: absolute;
-      top: 50%;
-      right: 0;
-      transform: translateY(-50%);
-    }
-    
-    #contact {
-      position: relative;
-      overflow: hidden;
-    }
-    
-    #contact::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, rgba(5, 5, 20, 0.9) 0%, rgba(10, 10, 30, 0.8) 100%);
-      z-index: -1;
-    }
-    
-    .contact-terminal {
-      max-width: 700px;
-      margin: 0 auto;
-      background-color: #000;
-      border: 2px solid #8a2be2;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 0 30px rgba(138, 43, 226, 0.5), 
-                  0 0 60px rgba(138, 43, 226, 0.3), 
-                  0 0 90px rgba(138, 43, 226, 0.1);
-      position: relative;
-    }
-    
-    .terminal-header {
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #333;
-      padding-bottom: 15px;
-      margin-bottom: 20px;
-    }
-    
-    .terminal-dots {
-      display: flex;
-      margin-right: 15px;
-    }
-    
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-    
-    .dot-red {
-      background-color: #ff5f56;
-    }
-    
-    .dot-yellow {
-      background-color: #ffbd2e;
-    }
-    
-    .dot-green {
-      background-color: #27c93f;
-    }
-    
-    .terminal-title {
-      color: #8a2be2;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 14px;
-      letter-spacing: 1px;
-    }
-    
-    .terminal-content {
-      padding: 10px 0;
-    }
-    
-    .command-line {
-      display: flex;
-      margin-bottom: 15px;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
-      color: #00ff00;
-    }
-    
-    .prompt {
-      color: #8a2be2;
-      margin-right: 10px;
-    }
-    
-    .command {
-      color: #f1f1f1;
-    }
-    
-    .response {
-      color: #f1f1f1;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
-      line-height: 1.6;
-      margin-bottom: 25px;
-      padding-left: 20px;
-      border-left: 2px solid #8a2be2;
-    }
-    
-    .typing {
-      display: flex;
-      align-items: center;
-    }
-    
-    .typing-prompt {
-      color: #8a2be2;
-      margin-right: 10px;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
-    }
-    
-    .typing-input {
-      flex: 1;
-      background-color: transparent;
-      border: none;
-      font-family: 'Press Start 2P', cursive;
-      font-size: 12px;
-      color: white;
-      caret-color: #8a2be2;
-      outline: none;
-      padding: 5px 0;
-    }
-    
-    .cursor {
-      display: inline-block;
-      width: 10px;
-      height: 16px;
-      background-color: #8a2be2;
-      margin-left: 5px;
-      animation: blink 1s infinite;
-    }
-    
-    @keyframes blink {
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0; }
-    }
-    
-    .contact-methods {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 30px;
-    }
-    
-    .contact-method {
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.3s ease, filter 0.3s ease;
-    }
-    
-    .contact-method:hover {
-      transform: translateY(-5px);
-      filter: brightness(1.2);
-    }
-    
-    .contact-icon {
-      font-size: 24px;
-      color: #8a2be2;
-      margin-bottom: 10px;
-    }
-    
-    .contact-label {
-      font-family: 'Press Start 2P', cursive;
-      font-size: 10px;
-      color: white;
-    }
-    
-    .section-title {
-      text-align: center;
-      color: #8a2be2;
-      margin-bottom: 50px;
-      position: relative;
-      display: inline-block;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-    
-    .section-title::after {
-      content: "";
-      position: absolute;
-      bottom: -10px;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, #8a2be2, transparent);
-    }
-  </style>
 </head>
 <body>
   <header>
@@ -229,7 +33,7 @@
     <div class="hero-content">
       <h1 class="hero-title glitch" data-text="Exploring The Digital Void">Exploring The Digital Void</h1>
       <p class="hero-subtitle">Pioneering innovative solutions for the future of technology. Join us on a journey beyond the limits of what's possible.</p>
-      <a href="hall.html" class="cta-button">Enter The Void</a>
+      <a href="hall.html" class="cta-button">Enter The Void 🛸</a>
       <model-viewer src="static/models/stanging_astronaut_fl_0321045322_texture.glb" alt="A 3D model of an astronaut" auto-rotate camera-controls></model-viewer>
     </div>
   </section>
@@ -239,12 +43,12 @@
     <div class="services">
       <div class="service-card">
         <h3>Our Mission</h3>
-        <p>At VOID LABS, we believe in pushing the boundaries of technology and innovation. Our mission is to create solutions that transcend conventional limitations and open new possibilities for the future.</p>
+        <p>Void Labs is dedicated to pioneering virtual experimentation that transcends physical limitations, democratizing access to cutting-edge scientific tools and methodologies. We empower researchers, educators, and innovators to explore, discover, and create in a risk-free digital environment that accelerates learning and breakthrough discoveries.</p>
         <div class="model-container" id="mission-model"></div>
       </div>
       <div class="service-card">
         <h3>Our Vision</h3>
-        <p>We envision a world where technology enhances human potential and creates sustainable solutions for global challenges. Our team works tirelessly to bring this vision to reality.</p>
+        <p>To become the leading virtual laboratory platform where imagination is the only constraint. We envision a future where Void Labs bridges geographical, economic, and resource barriers in scientific exploration, fostering a global community of problem-solvers united by curiosity and enabled by technology to address humanity's greatest challenges.</p>
         <div class="model-container" id="vision-model"></div>
       </div>
     </div>
@@ -254,18 +58,18 @@
     <h2 class="section-title">Our Services</h2>
     <div class="services">
       <div class="service-card">
-        <h3>VR/AR Experiences</h3>
-        <p>Immerse your audience in captivating virtual and augmented reality experiences that transcend physical limitations and create lasting impressions.</p>
+        <h3>Virtual Experiences</h3>
+        <p>Step into our immersive virtual laboratory where exploration knows no bounds. Experience the thrill of scientific discovery without physical constraints as you manipulate equipment, conduct experiments, and analyze results in real-time..</p>
         <div class="model-container" id="vr-model"></div>
       </div>
       <div class="service-card">
-        <h3>Digital Twin Creation</h3>
-        <p>Create comprehensive digital replicas of physical assets, processes, or systems to simulate, analyze, and optimize performance in virtual space.</p>
+        <h3>for whom ?</h3>
+        <p>Whether you're a student mastering fundamentals or a researcher testing advanced hypotheses, our intuitive interface adapts to your expertise level, providing guided assistance or complete experimental freedom.</p>
         <div class="model-container" id="twin-model"></div>
       </div>
       <div class="service-card">
-        <h3>Metaverse Development</h3>
-        <p>Build immersive digital worlds where users can interact, explore, and engage with your brand in unprecedented ways.</p>
+        <h3>Long-term Aspirations</h3>
+        <p>By 2030, Void Labs aims to:Be integrated into education systems worldwide, from secondary schools to universitiesSupport groundbreaking research in fields ranging from medicine to quantum physics</p>
         <div class="model-container" id="metaverse-model"></div>
       </div>
     </div>
@@ -281,33 +85,6 @@
           <span class="dot dot-green"></span>
         </div>
         <div class="terminal-title">void_communication_terminal.exe</div>
-      </div>
-      <div class="terminal-content">
-        <div class="command-line">
-          <span class="prompt">void@labs:~$</span>
-          <span class="command">./initialize_contact.sh</span>
-        </div>
-        <div class="response">
-          > Connection established<br>
-          > VOID LABS communication system initialized<br>
-          > Ready to receive your transmission
-        </div>
-        
-        <div class="command-line">
-          <span class="prompt">void@labs:~$</span>
-          <span class="command">./display_contact_info.sh</span>
-        </div>
-        <div class="response">
-          > Ready to embark on a journey through the digital void?<br>
-          > Our team of digital explorers awaits your signal.<br>
-          > Choose your preferred communication channel below.
-        </div>
-        
-        <div class="typing">
-          <span class="typing-prompt">void@labs:~$</span>
-          <input type="text" class="typing-input" placeholder="Type your message here...">
-          <span class="cursor"></span>
-        </div>
       </div>
       
       <div class="contact-methods">
